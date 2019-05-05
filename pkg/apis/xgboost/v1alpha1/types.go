@@ -1,4 +1,4 @@
-// Copyright 2018 The Kubeflow Authors
+// Copyright 2019 The Kubeflow Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package v1alpha1
 
 import (
-	commmonv1 "github.com/kubeflow/common/operator/v1"
+	common "github.com/kubeflow/common/operator/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -37,7 +37,7 @@ type XGBoostJob struct {
 	// This data may not be up to date.
 	// Populated by the system.
 	// Read-only.
-	Status commmonv1.JobStatus `json:"status,omitempty"`
+	Status common.JobStatus `json:"status,omitempty"`
 }
 
 // XGBoostJobSpec is a desired state description of the XGBoostJob.
@@ -45,14 +45,14 @@ type XGBoostJobSpec struct {
 	// RunPolicy encapsulates various runtime policies of the distributed training
 	// job, for example how to clean up resources and how long the job can stay
 	// active.
-	RunPolicy *commmonv1.RunPolicy `json:"runPolicy,omitempty"`
+	RunPolicy *common.RunPolicy `json:"runPolicy,omitempty"`
 
-	// XGBoostReplicaSpec specifies the XGBoost replicas to run.
-	XGBoostReplicaSpec map[XGBoostReplicaType]*commmonv1.ReplicaSpec `json:"xgboostReplicaSpec"`
+	// XGBoostReplicaSpecs specifies the XGBoost replicas to run.
+	XGBoostReplicaSpecs map[XGBoostReplicaType]*common.ReplicaSpec `json:"xgboostReplicaSpec"`
 }
 
 // XGBoostReplicaType is the type for XGBoostReplica.
-type XGBoostReplicaType commmonv1.ReplicaType
+type XGBoostReplicaType common.ReplicaType
 
 const (
 	// XGBoostReplicaTypeMaster is the type for master worker of distributed XGBoost Job.

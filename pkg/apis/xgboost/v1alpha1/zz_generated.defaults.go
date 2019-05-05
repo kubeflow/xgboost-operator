@@ -26,5 +26,18 @@ import (
 // Public to allow building arbitrary schemes.
 // All generated defaulters are covering - they call all nested defaulters.
 func RegisterDefaults(scheme *runtime.Scheme) error {
+	scheme.AddTypeDefaultingFunc(&XGBoostJob{}, func(obj interface{}) { SetObjectDefaults_XGBoostJob(obj.(*XGBoostJob)) })
+	scheme.AddTypeDefaultingFunc(&XGBoostJobList{}, func(obj interface{}) { SetObjectDefaults_XGBoostJobList(obj.(*XGBoostJobList)) })
 	return nil
+}
+
+func SetObjectDefaults_XGBoostJob(in *XGBoostJob) {
+	SetDefaults_XGBoostJob(in)
+}
+
+func SetObjectDefaults_XGBoostJobList(in *XGBoostJobList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_XGBoostJob(a)
+	}
 }

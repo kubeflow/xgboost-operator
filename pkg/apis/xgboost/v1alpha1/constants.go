@@ -12,10 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +k8s:deepcopy-gen=package,register
-// +k8s:defaulter-gen=TypeMeta
-// +k8s:openapi-gen=true
-
-// Package v1alpha1 is the v1alpha1 version of the API.
-// +groupName=kubeflow.org
 package v1alpha1
+
+import (
+	common "github.com/kubeflow/common/operator/v1"
+)
+
+const (
+	// EnvKubeflowNamespace is ENV for kubeflow namespace specified by user.
+	EnvKubeflowNamespace = "KUBEFLOW_NAMESPACE"
+
+	// DefaultPortName is name of the port used to communicate between workers.
+	DefaultPortName = "xgbjob-port"
+	// DefaultContainerName is the name of the TestJob container.
+	DefaultContainerName = "xgboost"
+	// DefaultPort is default value of the port.
+	DefaultPort = 23456
+	// DefaultRestartPolicy is default RestartPolicy for TFReplicaSpec.
+	DefaultRestartPolicy = common.RestartPolicyNever
+)
