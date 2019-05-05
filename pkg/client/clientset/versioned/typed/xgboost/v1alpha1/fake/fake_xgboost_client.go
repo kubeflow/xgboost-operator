@@ -17,22 +17,22 @@
 package fake
 
 import (
-	v1beta1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1beta1"
+	v1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeKubeflowV1beta1 struct {
+type FakeKubeflowV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeKubeflowV1beta1) XGBoostJobs(namespace string) v1beta1.XGBoostJobInterface {
+func (c *FakeKubeflowV1alpha1) XGBoostJobs(namespace string) v1alpha1.XGBoostJobInterface {
 	return &FakeXGBoostJobs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeKubeflowV1beta1) RESTClient() rest.Interface {
+func (c *FakeKubeflowV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

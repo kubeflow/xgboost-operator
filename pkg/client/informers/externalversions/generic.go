@@ -19,7 +19,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1beta1 "github.com/kubeflow/xgboost-1/pkg/apis/xgboost/v1beta1"
+	v1alpha1 "github.com/kubeflow/xgboost-1/pkg/apis/xgboost/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -50,9 +50,9 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=kubeflow.org, Version=v1beta1
-	case v1beta1.SchemeGroupVersion.WithResource("xgboostjobs"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1beta1().XGBoostJobs().Informer()}, nil
+	// Group=kubeflow.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("xgboostjobs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1alpha1().XGBoostJobs().Informer()}, nil
 
 	}
 

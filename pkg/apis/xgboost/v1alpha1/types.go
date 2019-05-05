@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1beta1
+package v1alpha1
 
 import (
 	commmonv1 "github.com/kubeflow/common/operator/v1"
@@ -38,8 +38,6 @@ type XGBoostJob struct {
 	// Populated by the system.
 	// Read-only.
 	Status commmonv1.JobStatus `json:"status,omitempty"`
-
-	commmonv1.CleanPodPolicy
 }
 
 // XGBoostJobSpec is a desired state description of the XGBoostJob.
@@ -49,9 +47,23 @@ type XGBoostJobSpec struct {
 	// active.
 	RunPolicy *commmonv1.RunPolicy `json:"runPolicy,omitempty"`
 
-	// XGBReplicaSpec specifies the PyTorch replicas to run.
-	XGBReplicaSpec *commmonv1.ReplicaSpec `json:"xgbReplicaSpec"`
+	// XGBoostReplicaSpec specifies the XGBoost replicas to run.
+	XGBoostReplicaSpec map[XGBoostReplicaType]*commmonv1.ReplicaSpec `json:"xgboostReplicaSpec"`
 }
+
+// XGBoostReplicaType is the type for XGBoostReplica.
+type XGBoostReplicaType commmonv1.ReplicaType
+
+const (
+	// XGBoostReplicaTypeMaster is the type for master worker of distributed XGBoost Job.
+	// Rank:0 will be assigned to master worker during AllReduce communication.
+	// This is also used as only worker of non-distributed XGBoost Job.
+	XGBoostReplicaTypeMaster XGBoostReplicaType = "Master"
+
+
+	// XGBoostReplicaTypeWorker is the type for workers of distributed XGBoost Job.
+	XGBoostReplicaTypeWorker XGBoostReplicaType = "Worker"
+)
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +resource:path=xgboostjobs

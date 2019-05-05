@@ -18,8 +18,8 @@ package fake
 
 import (
 	clientset "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned"
-	kubeflowv1beta1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1beta1"
-	fakekubeflowv1beta1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1beta1/fake"
+	kubeflowv1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
+	fakekubeflowv1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -69,12 +69,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// KubeflowV1beta1 retrieves the KubeflowV1beta1Client
-func (c *Clientset) KubeflowV1beta1() kubeflowv1beta1.KubeflowV1beta1Interface {
-	return &fakekubeflowv1beta1.FakeKubeflowV1beta1{Fake: &c.Fake}
+// KubeflowV1alpha1 retrieves the KubeflowV1alpha1Client
+func (c *Clientset) KubeflowV1alpha1() kubeflowv1alpha1.KubeflowV1alpha1Interface {
+	return &fakekubeflowv1alpha1.FakeKubeflowV1alpha1{Fake: &c.Fake}
 }
 
-// Kubeflow retrieves the KubeflowV1beta1Client
-func (c *Clientset) Kubeflow() kubeflowv1beta1.KubeflowV1beta1Interface {
-	return &fakekubeflowv1beta1.FakeKubeflowV1beta1{Fake: &c.Fake}
+// Kubeflow retrieves the KubeflowV1alpha1Client
+func (c *Clientset) Kubeflow() kubeflowv1alpha1.KubeflowV1alpha1Interface {
+	return &fakekubeflowv1alpha1.FakeKubeflowV1alpha1{Fake: &c.Fake}
 }
