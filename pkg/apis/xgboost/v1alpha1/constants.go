@@ -28,6 +28,6 @@ const (
 	DefaultContainerName = "xgboost"
 	// DefaultPort is default value of the port.
 	DefaultPort = 23456
-	// DefaultRestartPolicy is default RestartPolicy for TFReplicaSpec.
+	// DefaultRestartPolicy is default RestartPolicy for ReplicaSpec.
 	DefaultRestartPolicy = common.RestartPolicyNever
 )
