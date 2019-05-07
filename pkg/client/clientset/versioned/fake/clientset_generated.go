@@ -17,9 +17,9 @@
 package fake
 
 import (
-	clientset "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned"
-	kubeflowv1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
-	fakekubeflowv1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1/fake"
+	clientset "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
+	kubeflowv1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
+	fakekubeflowv1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/typed/xgboost/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

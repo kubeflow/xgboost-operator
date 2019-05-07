@@ -94,7 +94,7 @@ func (in *XGBoostJobSpec) DeepCopyInto(out *XGBoostJobSpec) {
 	}
 	if in.XGBoostReplicaSpecs != nil {
 		in, out := &in.XGBoostReplicaSpecs, &out.XGBoostReplicaSpecs
-		*out = make(map[XGBoostReplicaType]*v1.ReplicaSpec, len(*in))
+		*out = make(map[v1.ReplicaType]*v1.ReplicaSpec, len(*in))
 		for key, val := range *in {
 			var outVal *v1.ReplicaSpec
 			if val == nil {

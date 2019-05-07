@@ -17,8 +17,8 @@
 package kubeflow
 
 import (
-	internalinterfaces "github.com/kubeflow/xgboost-1/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/informers/externalversions/xgboost/v1alpha1"
+	internalinterfaces "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/xgboost/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

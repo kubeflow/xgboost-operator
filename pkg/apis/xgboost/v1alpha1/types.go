@@ -48,7 +48,7 @@ type XGBoostJobSpec struct {
 	RunPolicy *common.RunPolicy `json:"runPolicy,omitempty"`
 
 	// XGBoostReplicaSpecs specifies the XGBoost replicas to run.
-	XGBoostReplicaSpecs map[XGBoostReplicaType]*common.ReplicaSpec `json:"xgboostReplicaSpec"`
+	XGBoostReplicaSpecs map[common.ReplicaType]*common.ReplicaSpec `json:"xgboostReplicaSpec"`
 }
 
 // XGBoostReplicaType is the type for XGBoostReplica.

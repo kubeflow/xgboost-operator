@@ -31,12 +31,12 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 cd ${SCRIPT_ROOT}
 
 ${CODEGEN_PKG}/generate-groups.sh "defaulter,client,informer,lister,deepcopy" \
- github.com/kubeflow/xgboost/pkg/client github.com/kubeflow/xgboost/pkg/apis \
+ github.com/kubeflow/xgboost-operator/pkg/client github.com/kubeflow/xgboost-operator/pkg/apis \
  xgboost:v1alpha1 \
  --go-header-file ${SCRIPT_ROOT}/hack/boilerplate/boilerplate.go.txt
 
 echo "Generating defaulters for xgboost v1alpha1"
-${GOPATH}/bin/defaulter-gen --input-dirs github.com/kubeflow/xgboost/pkg/apis/xgboost/v1alpha1 \
+${GOPATH}/bin/defaulter-gen --input-dirs github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1 \
  -O zz_generated.defaults \
  --go-header-file ./hack/../hack/boilerplate/boilerplate.go.txt  \
- --output-package github.com/kubeflow/xgboost/pkg/apis/xgboost/v1alpha1
+ --output-package github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1
