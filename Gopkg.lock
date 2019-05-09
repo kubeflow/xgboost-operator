@@ -212,7 +212,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:daf19a7164a96cfa32e0e3f2a041d7f4b2e20cca965c2608c75ed13dea35d8d6"
+  digest = "1:bdda4baa294b883e6d7386ee15a37787686e5e1615ef3b64913e2852ce98b313"
   name = "github.com/kubeflow/common"
   packages = [
     "job_controller",
@@ -220,10 +220,47 @@
     "test_job/v1",
     "util",
     "util/k8sutil",
+    "util/signals",
     "util/train",
   ]
   pruneopts = "NUT"
   revision = "f38f5dc8bb4a8d869ca4144f39464b2f7c7e2f98"
+
+[[projects]]
+  digest = "1:75d5455d0aef750fc15811e2e420209cfa3a57fe315031f7481c7b295b513f9e"
+  name = "github.com/kubeflow/tf-operator"
+  packages = [
+    "cmd/tf-operator.v1beta1/app",
+    "cmd/tf-operator.v1beta1/app/options",
+    "pkg/apis/common/v1beta1",
+    "pkg/apis/common/v1beta2",
+    "pkg/apis/tensorflow/v1beta1",
+    "pkg/apis/tensorflow/v1beta2",
+    "pkg/apis/tensorflow/validation",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/tensorflow/v1beta1",
+    "pkg/client/clientset/versioned/typed/tensorflow/v1beta2",
+    "pkg/client/informers/externalversions",
+    "pkg/client/informers/externalversions/internalinterfaces",
+    "pkg/client/informers/externalversions/tensorflow",
+    "pkg/client/informers/externalversions/tensorflow/v1beta1",
+    "pkg/client/informers/externalversions/tensorflow/v1beta2",
+    "pkg/client/listers/tensorflow/v1beta1",
+    "pkg/client/listers/tensorflow/v1beta2",
+    "pkg/common/jobcontroller",
+    "pkg/common/util/v1beta1/unstructured",
+    "pkg/control",
+    "pkg/controller.v1beta1/tensorflow",
+    "pkg/logger",
+    "pkg/util/k8sutil",
+    "pkg/util/signals",
+    "pkg/util/train",
+    "pkg/version",
+  ]
+  pruneopts = "NUT"
+  revision = "aa322c7b557f742743038a81de01c4629a7ebe9b"
+  version = "v0.5.0"
 
 [[projects]]
   digest = "1:680c0fba95a0cff934e350b1ad6774d8229378a3e37d9902e07e2861e82a5908"
@@ -265,6 +302,14 @@
   pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:96df5bdca983e4b8c62682af5b67100b187d582ac6db0968d8af52e84138d1e6"
+  name = "github.com/onrik/logrus"
+  packages = ["filename"]
+  pruneopts = "NUT"
+  revision = "53793512254a4e0167c1f8a8dfaea958cf2c9824"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:e0cc8395ea893c898ff5eb0850f4d9851c1f57c78c232304a026379a47a552d0"
@@ -500,12 +545,19 @@
   version = "kubernetes-1.11.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d7276d849da38d07fd1cc29884d0424523f3c6e8086de9b477982100593a0c57"
+  digest = "1:51e1d04096765a19202e8735ba297d10dadd5c7efd26673fb43da72501dc2159"
   name = "k8s.io/apiextensions-apiserver"
-  packages = ["pkg/features"]
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
+    "pkg/features",
+  ]
   pruneopts = "NUT"
-  revision = "ae1f9335ecc19eb6255cfe787574b8c4645dbca3"
+  revision = "408db4a50408e2149acbd657bceb2480c13cb0a4"
+  version = "kubernetes-1.11.2"
 
 [[projects]]
   digest = "1:b9a9145446000d84546098216044a1443e1a86a36eee7bd51b417606d8dcc627"
@@ -575,11 +627,12 @@
   revision = "7dc4ceb2fd3311166a78bdf6a4eec4c194364dd0"
 
 [[projects]]
-  digest = "1:67424ba90f2dd087e111e0fbf1e9ed9965be56c050c61966b0962d40d730d260"
+  digest = "1:77557c5f78768accc447b3629b632c90c121f98b2614f6e1145f4081de949e4c"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
+    "dynamic",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1alpha1",
@@ -693,6 +746,8 @@
     "tools/clientcmd/api",
     "tools/clientcmd/api/latest",
     "tools/clientcmd/api/v1",
+    "tools/leaderelection",
+    "tools/leaderelection/resourcelock",
     "tools/metrics",
     "tools/pager",
     "tools/record",
@@ -768,19 +823,16 @@
   version = "v0.3.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:04a95004007233fec0032ea7693991ae33c31be3dd8435358ee7842ef9133bb5"
+  branch = "release-1.10"
+  digest = "1:5e6cf5c86780f55cab6254217bc22e327606b6d09aed280ac12494d837327512"
   name = "k8s.io/kube-openapi"
   packages = [
-    "cmd/openapi-gen/args",
     "pkg/common",
     "pkg/generators",
-    "pkg/generators/rules",
     "pkg/util/proto",
-    "pkg/util/sets",
   ]
   pruneopts = "NUT"
-  revision = "411b2483e5034420675ebcdd4a55fc76fe5e55cf"
+  revision = "39cb288412c48cb533ba4be5d6c28620b9a0c1b4"
 
 [[projects]]
   digest = "1:238b115dc7b42ce1b338b4e513023d918725396dba1059a45643eb8b5c0e75cf"
@@ -833,7 +885,11 @@
     "github.com/kubeflow/common/operator/v1",
     "github.com/kubeflow/common/util",
     "github.com/kubeflow/common/util/k8sutil",
+    "github.com/kubeflow/common/util/signals",
+    "github.com/kubeflow/tf-operator/cmd/tf-operator.v1beta1/app",
+    "github.com/kubeflow/tf-operator/cmd/tf-operator.v1beta1/app/options",
     "github.com/kubernetes-sigs/kube-batch/pkg/client/clientset/versioned",
+    "github.com/onrik/logrus/filename",
     "github.com/sirupsen/logrus",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -845,15 +901,21 @@
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/runtime",
+    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/informers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/tools/leaderelection",
+    "k8s.io/client-go/tools/leaderelection/resourcelock",
+    "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",

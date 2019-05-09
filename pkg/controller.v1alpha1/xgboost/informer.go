@@ -19,9 +19,15 @@ import (
 	commonutil "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/validation"
+	jobinformer "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/xgboost/v1alpha1"
+	"github.com/kubeflow/xgboost-operator/pkg/common/util/v1alpha1/unstructured"
 	log "github.com/sirupsen/logrus"
 	metav1unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	restclientset "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
 	"time"
 )
 
@@ -35,6 +41,29 @@ var (
 	errNotExists     = fmt.Errorf("the object is not found")
 	errFailedMarshal = fmt.Errorf("failed to marshal the object to XGBoostJob")
 )
+
+func NewUnstructuredXGBoostJobInformer(restConfig *restclientset.Config, namespace string) jobinformer.XGBoostJobInformer {
+	dclient, err := dynamic.NewForConfig(restConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	resource := schema.GroupVersionResource{
+		Group:    v1alpha1.GroupName,
+		Version:  v1alpha1.GroupVersion,
+		Resource: v1alpha1.Plural,
+	}
+
+	informer := unstructured.NewXGBoostJobInformer(
+		resource,
+		dclient,
+		namespace,
+		resyncPeriod,
+		cache.Indexers{},
+)
+
+	return informer
+}
 
 func (xc *XGBoostController) getXGBoostJobFromName(namespace, name string) (*v1alpha1.XGBoostJob, error) {
 	key := fmt.Sprintf("%s/%s", namespace, name)

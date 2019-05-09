@@ -20,7 +20,7 @@ import (
 	common "github.com/kubeflow/common/operator/v1"
 	commonutil "github.com/kubeflow/common/util"
 	"github.com/kubeflow/common/util/k8sutil"
-	"github.com/kubeflow/xgboost-operator/cmd/xgboost-operator/app/options"
+	"github.com/kubeflow/xgboost-operator/cmd/xgboost-operator.v1alpha1/app/options"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	jobclientset "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
 	jobscheme "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/scheme"
