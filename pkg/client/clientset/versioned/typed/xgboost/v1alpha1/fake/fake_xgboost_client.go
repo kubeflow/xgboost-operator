@@ -17,7 +17,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
+	v1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
