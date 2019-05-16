@@ -129,7 +129,7 @@ func (xc *XGBoostController) Run(threadiness int, stopCh <-chan struct{}) error 
 	defer xc.WorkQueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches.
-	log.Info("Starting TFJob controller")
+	log.Info("Starting XGBoostJob controller")
 
 	// Wait for the caches to be synced before starting workers.
 	log.Info("Waiting for informer caches to sync")
@@ -139,7 +139,7 @@ func (xc *XGBoostController) Run(threadiness int, stopCh <-chan struct{}) error 
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 	log.Infof("Starting %v workers", threadiness)
-	// Launch workers to process TFJob resources.
+	// Launch workers to process XGBoostJob resources.
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(xc.runWorker, time.Second, stopCh)
 	}
