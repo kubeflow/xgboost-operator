@@ -32,8 +32,9 @@ const (
 	xgboostJobRestartingReason = "XGBoostJobRestarting"
 )
 
-func (xc *XGBoostController) UpdateJobStatus(job interface{}, replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec,
-	jobStatus commonv1.JobStatus, restart bool) error {
+func (xc *XGBoostController) UpdateJobStatus(job interface{},
+	replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec,
+	jobStatus *commonv1.JobStatus) error {
 	//	TODO: Implement this method
 	return nil
 }

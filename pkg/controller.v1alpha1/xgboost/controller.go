@@ -73,7 +73,8 @@ func NewXGBoostController(
 
 	// Create base controller
 	log.Info("Creating Job controller")
-	jc := jobcontroller.NewJobController(xc, metav1.Duration{Duration: 15 * time.Second},
+	jc := jobcontroller.NewJobController(xc,
+		metav1.Duration{Duration: 15 * time.Second},
 		option.EnableGangScheduling,
 		kubeClientSet, kubeBatchClientSet, kubeInformerFactory,
 		v1alpha1.Plural)
@@ -89,6 +90,32 @@ func NewXGBoostController(
 
 	xc.jobInformer = jobInformer.Informer()
 	xc.jobInformerSynced = jobInformer.Informer().HasSynced
+
+	// Create pod informer.
+	podInformer := kubeInformerFactory.Core().V1().Pods()
+
+	// Set up an event handler for when pod resources change
+	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    jc.AddPod,
+		UpdateFunc: jc.UpdatePod,
+		DeleteFunc: jc.DeletePod,
+	})
+
+	xc.PodLister = podInformer.Lister()
+	xc.PodInformerSynced = podInformer.Informer().HasSynced
+
+	// Create service informer.
+	serviceInformer := kubeInformerFactory.Core().V1().Services()
+
+	// Set up an event handler for when service resources change.
+	serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    jc.AddService,
+		UpdateFunc: jc.UpdateService,
+		DeleteFunc: jc.DeleteService,
+	})
+
+	xc.ServiceLister = serviceInformer.Lister()
+	xc.ServiceInformerSynced = serviceInformer.Informer().HasSynced
 
 	return xc
 }
@@ -296,11 +323,19 @@ func (XGBoostController) GetGroupNameLabelValue() string {
 	return v1alpha1.GroupName
 }
 
-func (xc *XGBoostController) GetDefaultContainerName() string {
+func (XGBoostController) GetDefaultContainerName() string {
 	return v1alpha1.DefaultContainerName
 }
 
-func (xc *XGBoostController) IsMasterRole(replicas map[common.ReplicaType]*common.ReplicaSpec,
+func (XGBoostController) GetDefaultContainerPortNumber() string {
+	return string(v1alpha1.DefaultPort)
+}
+
+func (XGBoostController) GetJobRoleKey() string {
+	return ""
+}
+
+func (XGBoostController) IsMasterRole(replicas map[common.ReplicaType]*common.ReplicaSpec,
 	rtype common.ReplicaType, index int) bool {
 	return string(rtype) == string(v1alpha1.XGBoostReplicaTypeMaster)
 }

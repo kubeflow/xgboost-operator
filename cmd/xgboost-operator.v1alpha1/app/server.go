@@ -86,11 +86,11 @@ func Run(opt *options.ServerOption) error {
 	}
 
 	// Create clients.
-	kubeClientSet, leaderElectionClientSet, pytorchJobClientSet, kubeBatchClientSet, err := createClientSets(kcfg)
+	kubeClientSet, leaderElectionClientSet, xgboostJobClientSet, kubeBatchClientSet, err := createClientSets(kcfg)
 	if err != nil {
 		return err
 	}
-	if !checkCRDExists(pytorchJobClientSet, opt.Namespace) {
+	if !checkCRDExists(xgboostJobClientSet, opt.Namespace) {
 		log.Info("CRD doesn't exist. Exiting")
 		os.Exit(1)
 	}
@@ -99,8 +99,8 @@ func Run(opt *options.ServerOption) error {
 
 	unstructuredInformer := controller.NewUnstructuredXGBoostJobInformer(kcfg, opt.Namespace)
 
-	// Create pytorch controller.
-	tc := controller.NewXGBoostController(unstructuredInformer, kubeClientSet, kubeBatchClientSet, pytorchJobClientSet, kubeInformerFactory, *opt)
+	// Create xgboost controller.
+	xc := controller.NewXGBoostController(unstructuredInformer, kubeClientSet, kubeBatchClientSet, xgboostJobClientSet, kubeInformerFactory, *opt)
 
 	// Start informer goroutines.
 	go kubeInformerFactory.Start(stopCh)
@@ -109,7 +109,7 @@ func Run(opt *options.ServerOption) error {
 
 	// Set leader election start function.
 	run := func(<-chan struct{}) {
-		if err := tc.Run(opt.Threadiness, stopCh); err != nil {
+		if err := xc.Run(opt.Threadiness, stopCh); err != nil {
 			log.Errorf("Failed to run the controller: %v", err)
 		}
 	}
@@ -124,12 +124,12 @@ func Run(opt *options.ServerOption) error {
 	if err = v1.AddToScheme(scheme.Scheme); err != nil {
 		return fmt.Errorf("coreV1 Add Scheme failed: %v", err)
 	}
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "pytorch-operator"})
+	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "xgboost-operator"})
 
 	rl := &resourcelock.EndpointsLock{
 		EndpointsMeta: metav1.ObjectMeta{
 			Namespace: namespace,
-			Name:      "pytorch-operator",
+			Name:      "xgboost-operator",
 		},
 		Client: leaderElectionClientSet.CoreV1(),
 		LockConfig: resourcelock.ResourceLockConfig{

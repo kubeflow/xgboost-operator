@@ -44,8 +44,8 @@ func (s *ServerOption) AddFlags(fs *flag.FlagSet) {
 		 will overrides any value in kubeconfig, only required if out-of-cluster.`)
 
 	fs.StringVar(&s.Namespace, "namespace", v1.NamespaceAll,
-		`The namespace to monitor pytorch jobs. If unset, it monitors all namespaces cluster-wide.
-                 If set, it only monitors pytorch jobs in the given namespace.`)
+		`The namespace to monitor xgboost jobs. If unset, it monitors all namespaces cluster-wide.
+                 If set, it only monitors xgboost jobs in the given namespace.`)
 
 	fs.IntVar(&s.Threadiness, "threadiness", 1,
 		`How many threads to process the main logic`)

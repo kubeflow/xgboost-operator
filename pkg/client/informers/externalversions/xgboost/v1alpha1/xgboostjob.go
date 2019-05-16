@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	time "time"
 
-	xgboostv1alpha1 "github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
+	xgboost_v1alpha1 "github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	versioned "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/listers/xgboost/v1alpha1"
@@ -68,7 +68,7 @@ func NewFilteredXGBoostJobInformer(client versioned.Interface, namespace string,
 				return client.KubeflowV1alpha1().XGBoostJobs(namespace).Watch(options)
 			},
 		},
-		&xgboostv1alpha1.XGBoostJob{},
+		&xgboost_v1alpha1.XGBoostJob{},
 		resyncPeriod,
 		indexers,
 	)
@@ -79,7 +79,7 @@ func (f *xGBoostJobInformer) defaultInformer(client versioned.Interface, resyncP
 }
 
 func (f *xGBoostJobInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&xgboostv1alpha1.XGBoostJob{}, f.defaultInformer)
+	return f.factory.InformerFor(&xgboost_v1alpha1.XGBoostJob{}, f.defaultInformer)
 }
 
 func (f *xGBoostJobInformer) Lister() v1alpha1.XGBoostJobLister {

@@ -16,6 +16,7 @@ package validation
 
 import (
 	"fmt"
+	common "github.com/kubeflow/common/operator/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
@@ -30,7 +31,7 @@ func ValidateAlphaOneXGBoostJobSpec(c *v1alpha1.XGBoostJobSpec) error {
 			return fmt.Errorf("XGBoostJobSpec is not valid")
 		}
 		// Make sure the replica type is valid.
-		validReplicaTypes := []v1alpha1.XGBoostReplicaType{v1alpha1.XGBoostReplicaTypeMaster, v1alpha1.XGBoostReplicaTypeWorker}
+		validReplicaTypes := []common.ReplicaType{v1alpha1.XGBoostReplicaTypeMaster, v1alpha1.XGBoostReplicaTypeWorker}
 
 		isValidReplicaType := false
 		for _, t := range validReplicaTypes {
@@ -55,9 +56,9 @@ func ValidateAlphaOneXGBoostJobSpec(c *v1alpha1.XGBoostJobSpec) error {
 				defaultContainerPresent = true
 			}
 		}
-		//Make sure there has at least one container named "pytorch"
+		//Make sure there has at least one container named "xgboost"
 		if !defaultContainerPresent {
-			log.Warnf("There is no container named pytorch in %v", rType)
+			log.Warnf("There is no container named xgboost in %v", rType)
 			return fmt.Errorf("XGBoostJobSpec is not valid")
 		}
 		if rType == v1alpha1.XGBoostReplicaTypeMaster {

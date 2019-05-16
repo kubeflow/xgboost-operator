@@ -89,22 +89,23 @@ func (in *XGBoostJobSpec) DeepCopyInto(out *XGBoostJobSpec) {
 	*out = *in
 	if in.RunPolicy != nil {
 		in, out := &in.RunPolicy, &out.RunPolicy
-		*out = new(v1.RunPolicy)
-		(*in).DeepCopyInto(*out)
+		if *in == nil {
+			*out = nil
+		} else {
+			*out = new(v1.RunPolicy)
+			(*in).DeepCopyInto(*out)
+		}
 	}
 	if in.XGBoostReplicaSpecs != nil {
 		in, out := &in.XGBoostReplicaSpecs, &out.XGBoostReplicaSpecs
 		*out = make(map[v1.ReplicaType]*v1.ReplicaSpec, len(*in))
 		for key, val := range *in {
-			var outVal *v1.ReplicaSpec
 			if val == nil {
 				(*out)[key] = nil
 			} else {
-				in, out := &val, &outVal
-				*out = new(v1.ReplicaSpec)
-				(*in).DeepCopyInto(*out)
+				(*out)[key] = new(v1.ReplicaSpec)
+				val.DeepCopyInto((*out)[key])
 			}
-			(*out)[key] = outVal
 		}
 	}
 	return
