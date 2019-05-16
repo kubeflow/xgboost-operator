@@ -17,7 +17,7 @@
 package versioned
 
 import (
-	kubeflowv1alpha1 "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
+	kubeflowv1alpha1 "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/typed/xgboost/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

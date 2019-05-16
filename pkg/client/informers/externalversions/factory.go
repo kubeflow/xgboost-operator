@@ -21,9 +21,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/kubeflow/xgboost-1/pkg/client/informers/externalversions/internalinterfaces"
-	xgboost "github.com/kubeflow/xgboost-1/pkg/client/informers/externalversions/xgboost"
+	versioned "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/internalinterfaces"
+	xgboost "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions/xgboost"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
