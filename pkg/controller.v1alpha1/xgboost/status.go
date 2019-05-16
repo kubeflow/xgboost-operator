@@ -19,6 +19,8 @@ import (
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 )
 
+// uncomment Reasons temporarily to pass golang ci-lint, since they are unused for now.
+/*
 const (
 	// xgboostJobCreatedReason is added in a job when it is created.
 	xgboostJobCreatedReason = "XGBoostJobCreated"
@@ -31,6 +33,7 @@ const (
 	// xgboostJobRestarting is added in a job when it is restarting.
 	xgboostJobRestartingReason = "XGBoostJobRestarting"
 )
+*/
 
 func (xc *XGBoostController) UpdateJobStatus(job interface{},
 	replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec,

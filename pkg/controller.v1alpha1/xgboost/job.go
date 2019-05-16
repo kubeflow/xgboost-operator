@@ -28,10 +28,22 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
 const failedMarshalXGBoostJobReason = "InvalidXGBoostJobSpec"
+
+func (xc *XGBoostController) enqueueXGBoostJob(job interface{}) {
+	key, err := jobcontroller.KeyFunc(job)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for job object %#v: %v", job, err))
+		return
+	}
+
+	// TODO: we may need add backoff here
+	xc.WorkQueue.Add(key)
+}
 
 // When a pod is added, set the defaults and enqueue the current xgboostjob.
 func (xc *XGBoostController) addXGBoostJob(obj interface{}) {

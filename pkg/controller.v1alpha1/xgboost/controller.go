@@ -214,17 +214,6 @@ func (xc *XGBoostController) processNextWorkItem() bool {
 	return true
 }
 
-func (xc *XGBoostController) enqueueXGBoostJob(job interface{}) {
-	key, err := jobcontroller.KeyFunc(job)
-	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("couldn't get key for job object %#v: %v", job, err))
-		return
-	}
-
-	// TODO: we may need add backoff here
-	xc.WorkQueue.Add(key)
-}
-
 // syncXGBoostJob syncs the job with the given key if it has had its expectations fulfilled, meaning
 // it did not expect to see any more of its pods/services created or deleted.
 // This function is not meant to be invoked concurrently with the same key.
