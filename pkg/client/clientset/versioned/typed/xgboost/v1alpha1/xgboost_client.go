@@ -17,8 +17,8 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kubeflow/xgboost-1/pkg/apis/xgboost/v1alpha1"
-	"github.com/kubeflow/xgboost-1/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
+	"github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )

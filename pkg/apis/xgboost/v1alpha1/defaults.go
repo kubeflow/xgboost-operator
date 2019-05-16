@@ -74,7 +74,7 @@ func setTypeNamesToCamelCase(xgboostJob *XGBoostJob) {
 }
 
 // setTypeNameToCamelCase sets the name of the replica type from any case to correct case.
-func setTypeNameToCamelCase(xgboostJob *XGBoostJob, typ XGBoostReplicaType) {
+func setTypeNameToCamelCase(xgboostJob *XGBoostJob, typ common.ReplicaType) {
 	for t := range xgboostJob.Spec.XGBoostReplicaSpecs {
 		if strings.EqualFold(string(t), string(typ)) && t != typ {
 			spec := xgboostJob.Spec.XGBoostReplicaSpecs[t]
