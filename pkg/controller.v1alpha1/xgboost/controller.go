@@ -20,6 +20,7 @@ import (
 	common "github.com/kubeflow/common/operator/v1"
 	commonutil "github.com/kubeflow/common/util"
 	"github.com/kubeflow/common/util/k8sutil"
+	pylogger "github.com/kubeflow/tf-operator/pkg/logger"
 	"github.com/kubeflow/xgboost-operator/cmd/xgboost-operator.v1alpha1/app/options"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	jobclientset "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
@@ -95,8 +96,11 @@ func NewXGBoostController(
 	jc := jobcontroller.NewJobController(xc,
 		metav1.Duration{Duration: 15 * time.Second},
 		option.EnableGangScheduling,
-		kubeClientSet, kubeBatchClientSet, kubeInformerFactory,
+		kubeClientSet,
+		kubeBatchClientSet,
+		kubeInformerFactory,
 		v1alpha1.Plural)
+
 	xc.JobController = jc
 
 	xc.syncHandler = xc.syncXGBoostJob
@@ -313,6 +317,136 @@ func (xc *XGBoostController) satisfiedExpectations(job *v1alpha1.XGBoostJob) boo
 	}
 
 	return false
+}
+
+// reconcilePyTorchJobs checks and updates replicas for each given PyTorchReplicaSpec.
+// It will requeue the job in case of an error while creating/deleting pods/services.
+func (xc *XGBoostController) reconcileXGBoostJobs(job *v1alpha1.XGBoostJob) error {
+	jobKey, err := KeyFunc(job)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for pytorch job object %#v: %v", job, err))
+		return err
+	}
+
+	logger := pylogger.LoggerForJob(job)
+	logger.Infof("Reconcile PyTorchJobs %s", job.Name)
+
+	pods, err := xc.GetPodsForJob(job)
+
+	if err != nil {
+		logger.Warnf("getPodsForPyTorchJob error %v", err)
+		return err
+	}
+
+	services, err := pc.GetServicesForJob(job)
+
+	if err != nil {
+		logger.Warnf("getServicesForPyTorchJob error %v", err)
+		return err
+	}
+
+	// retrieve the previous number of retry
+	previousRetry := pc.WorkQueue.NumRequeues(jobKey)
+
+	activePods := k8sutil.FilterActivePods(pods)
+	active := int32(len(activePods))
+	failed := int32(k8sutil.FilterPods(pods, v1.PodFailed))
+	totalReplicas := getTotalReplicas(job)
+	prevReplicasFailedNum := getTotalFailedReplicas(job)
+
+	var failureMessage string
+	jobExceedsLimit := false
+	exceedsBackoffLimit := false
+	pastBackoffLimit := false
+
+	if job.Spec.BackoffLimit != nil {
+		jobHasNewFailure := failed > prevReplicasFailedNum
+		// new failures happen when status does not reflect the failures and active
+		// is different than parallelism, otherwise the previous controller loop
+		// failed updating status so even if we pick up failure it is not a new one
+		exceedsBackoffLimit = jobHasNewFailure && (active != totalReplicas) &&
+			(int32(previousRetry)+1 > *job.Spec.BackoffLimit)
+
+		pastBackoffLimit, err = pc.pastBackoffLimit(job, pods)
+		if err != nil {
+			return err
+		}
+	}
+
+	if exceedsBackoffLimit || pastBackoffLimit {
+		// check if the number of pod restart exceeds backoff (for restart OnFailure only)
+		// OR if the number of failed jobs increased since the last syncJob
+		jobExceedsLimit = true
+		failureMessage = fmt.Sprintf("PyTorchJob %s has failed because it has reached the specified backoff limit", job.Name)
+	} else if pc.pastActiveDeadline(job) {
+		failureMessage = fmt.Sprintf("PyTorchJob %s has failed because it was active longer than specified deadline", job.Name)
+		jobExceedsLimit = true
+	}
+
+	// If the PyTorchJob is terminated, delete all pods and services.
+	if isSucceeded(job.Status) || isFailed(job.Status) || jobExceedsLimit {
+		if err := pc.deletePodsAndServices(job, pods); err != nil {
+			return err
+		}
+
+		if err := pc.cleanupPyTorchJob(job); err != nil {
+			return err
+		}
+
+		if pc.Config.EnableGangScheduling {
+			pc.Recorder.Event(job, v1.EventTypeNormal, "JobTerminated", "Job is terminated, deleting PodGroup")
+			if err := pc.DeletePodGroup(job); err != nil {
+				pc.Recorder.Eventf(job, v1.EventTypeWarning, "FailedDeletePodGroup", "Error deleting: %v", err)
+				return err
+			} else {
+				pc.Recorder.Eventf(job, v1.EventTypeNormal, "SuccessfulDeletePodGroup", "Deleted PodGroup: %v", job.Name)
+
+			}
+		}
+		if jobExceedsLimit {
+			pc.Recorder.Event(job, v1.EventTypeNormal, pytorchJobFailedReason, failureMessage)
+			if job.Status.CompletionTime == nil {
+				now := metav1.Now()
+				job.Status.CompletionTime = &now
+			}
+			err := updatePyTorchJobConditions(job, common.JobFailed, pytorchJobFailedReason, failureMessage)
+			if err != nil {
+				logger.Infof("Append pytorchjob condition error: %v", err)
+				return err
+			}
+		}
+		// At this point the pods may have been deleted, so if the job succeeded, we need to manually set the replica status.
+		// If any replicas are still Active, set their status to succeeded.
+		if isSucceeded(job.Status) {
+			for rtype := range job.Status.ReplicaStatuses {
+				job.Status.ReplicaStatuses[rtype].Succeeded += job.Status.ReplicaStatuses[rtype].Active
+				job.Status.ReplicaStatuses[rtype].Active = 0
+			}
+		}
+		return pc.updateStatusHandler(job)
+	}
+
+	// Save the current state of the replicas
+	replicasStatus := make(map[string]v1.PodPhase)
+
+	// Diff current active pods/services with replicas.
+	for rtype, spec := range job.Spec.PyTorchReplicaSpecs {
+		err = pc.reconcilePods(job, pods, rtype, spec, replicasStatus)
+		if err != nil {
+			logger.Warnf("reconcilePods error %v", err)
+			return err
+		}
+
+		err = pc.reconcileServices(job, services, rtype, spec)
+
+		if err != nil {
+			logger.Warnf("reconcileServices error %v", err)
+			return err
+		}
+	}
+
+	// TODO(CPH): Add check here, no need to update the job if the status hasn't changed since last time.
+	return pc.updateStatusHandler(job)
 }
 
 func (XGBoostController) ControllerName() string {

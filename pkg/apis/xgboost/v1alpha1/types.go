@@ -52,7 +52,7 @@ type XGBoostJobSpec struct {
 }
 
 // XGBoostReplicaType is the type for XGBoostReplica.
-// type XGBoostReplicaType common.ReplicaType
+type XGBoostReplicaType common.ReplicaType
 
 const (
 	// XGBoostReplicaTypeMaster is the type for master worker of distributed XGBoost Job.

@@ -17,6 +17,8 @@ package xgboost
 import (
 	"errors"
 	"fmt"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/kubernetes/pkg/controller"
 	"strconv"
 	"strings"
 
@@ -29,6 +31,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	pylogger "github.com/kubeflow/tf-operator/pkg/logger"
 
@@ -66,7 +69,7 @@ func (xc *XGBoostController) DeleteService(job interface{}, name string, namespa
 	return xc.ServiceControl.DeleteService(namespace, name, job.(*v1alpha1.XGBoostJob))
 }
 
-func (xc *XGBoostController) CreatePod(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostReplicaType, index string, spec *common.ReplicaSpec, masterRole bool) error {
+func (xc *XGBoostController) CreateNewPod(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostReplicaType, index string, spec *common.ReplicaSpec, masterRole bool) error {
 
 	rt := strings.ToLower(string(rtype))
 	jobKey, err := KeyFunc(job)
@@ -232,6 +235,42 @@ func GetPortFromXGBoostJob(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostRepli
 		}
 	}
 	return -1, errPortNotFound
+}
+
+// getPodsForJob returns the set of pods that this job should manage.
+// It also reconciles ControllerRef by adopting/orphaning.
+// Note that the returned Pods are pointers into the cache.
+func (xc *XGBoostController) GetPodsForJob(job metav1.Object) ([]*corev1.Pod, error) {
+	// Create selector.
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: xc.GenLabels(job.GetName()),
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("couldn't convert Job selector: %v", err)
+	}
+	// List all pods to include those that don't match the selector anymore
+	// but have a ControllerRef pointing to this controller.
+	pods, err := xc.PodLister.Pods(job.GetNamespace()).List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	// If any adoptions are attempted, we should first recheck for deletion
+	// with an uncached quorum read sometime after listing Pods (see #42639).
+
+	canAdoptFunc := RecheckDeletionTimestamp(func() (metav1.Object, error) {
+		fresh, err := xc.Controller.GetJobFromAPIClient(job.GetNamespace(), job.GetName())
+		if err != nil {
+			return nil, err
+		}
+		if fresh.GetUID() != job.GetUID() {
+			return nil, fmt.Errorf("original Job %v/%v is gone: got uid %v, wanted %v", job.GetNamespace(), job.GetName(), fresh.GetUID(), job.GetUID())
+		}
+		return fresh, nil
+	})
+	cm := controller.NewPodControllerRefManager(xc.PodControl, job, selector, xc.Controller.GetAPIGroupVersionKind(), canAdoptFunc)
+	return cm.ClaimPods(pods)
 }
 
 
