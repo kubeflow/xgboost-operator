@@ -54,11 +54,6 @@ var (
 	errPortNotFound = fmt.Errorf("failed to found the port")
 )
 
-func (xc *XGBoostController) SetClusterSpec(job interface{}, podTemplate *corev1.PodTemplateSpec,
-	rtype, index string) error {
-	// TODO: Implement this method
-	return nil
-}
 
 func (xc *XGBoostController) CreateService(job interface{}, service *corev1.Service) error {
 	xgbJob := job.(*v1alpha1.XGBoostJob)
