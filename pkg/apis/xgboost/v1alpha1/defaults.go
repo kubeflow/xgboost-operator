@@ -69,8 +69,8 @@ func setDefaultReplicas(spec *common.ReplicaSpec) {
 
 // setTypeNamesToCamelCase sets the name of all replica types from any case to correct case.
 func setTypeNamesToCamelCase(xgboostJob *XGBoostJob) {
-	setTypeNameToCamelCase(xgboostJob, XGBoostReplicaTypeWorker)
-	setTypeNameToCamelCase(xgboostJob, XGBoostReplicaTypeMaster)
+	setTypeNameToCamelCase(xgboostJob, common.ReplicaType(XGBoostReplicaTypeWorker))
+	setTypeNameToCamelCase(xgboostJob, common.ReplicaType(XGBoostReplicaTypeMaster))
 }
 
 // setTypeNameToCamelCase sets the name of the replica type from any case to correct case.

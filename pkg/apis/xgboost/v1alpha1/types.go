@@ -58,11 +58,10 @@ const (
 	// XGBoostReplicaTypeMaster is the type for master worker of distributed XGBoost Job.
 	// Rank:0 will be assigned to master worker during AllReduce communication.
 	// This is also used as only worker of non-distributed XGBoost Job.
-	XGBoostReplicaTypeMaster common.ReplicaType = "Master"
-
+	XGBoostReplicaTypeMaster XGBoostReplicaType = "Master"
 
 	// XGBoostReplicaTypeWorker is the type for workers of distributed XGBoost Job.
-	XGBoostReplicaTypeWorker common.ReplicaType = "Worker"
+	XGBoostReplicaTypeWorker XGBoostReplicaType = "Worker"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

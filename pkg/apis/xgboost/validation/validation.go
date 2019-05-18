@@ -16,7 +16,6 @@ package validation
 
 import (
 	"fmt"
-	common "github.com/kubeflow/common/operator/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,11 +30,11 @@ func ValidateAlphaOneXGBoostJobSpec(c *v1alpha1.XGBoostJobSpec) error {
 			return fmt.Errorf("XGBoostJobSpec is not valid")
 		}
 		// Make sure the replica type is valid.
-		validReplicaTypes := []common.ReplicaType{v1alpha1.XGBoostReplicaTypeMaster, v1alpha1.XGBoostReplicaTypeWorker}
+		validReplicaTypes := []v1alpha1.XGBoostReplicaType{v1alpha1.XGBoostReplicaTypeMaster, v1alpha1.XGBoostReplicaTypeWorker}
 
 		isValidReplicaType := false
 		for _, t := range validReplicaTypes {
-			if t == rType {
+			if string(t) == string(rType) {
 				isValidReplicaType = true
 				break
 			}
@@ -61,7 +60,7 @@ func ValidateAlphaOneXGBoostJobSpec(c *v1alpha1.XGBoostJobSpec) error {
 			log.Warnf("There is no container named xgboost in %v", rType)
 			return fmt.Errorf("XGBoostJobSpec is not valid")
 		}
-		if rType == v1alpha1.XGBoostReplicaTypeMaster {
+		if string(rType) == string(v1alpha1.XGBoostReplicaTypeMaster) {
 			masterExists = true
 			if value.Replicas != nil && int(*value.Replicas) != 1 {
 				log.Warnf("There must be only 1 master replica")

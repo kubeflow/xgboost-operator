@@ -17,8 +17,6 @@ package xgboost
 import (
 	"errors"
 	"fmt"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/kubernetes/pkg/controller"
 	"strconv"
 	"strings"
 
@@ -149,6 +147,11 @@ func (xc *XGBoostController) CreateNewPod(job *v1alpha1.XGBoostJob, rtype v1alph
 	return nil
 }
 
+func (xc *XGBoostController) CreatePod(job interface {}, pod *corev1.PodTemplateSpec) error {
+	///TODO
+	return nil
+}
+
 func (xc *XGBoostController) DeletePod(job interface{}, pod *corev1.Pod) error {
 	log.Info("Deleting pod " + pod.Name)
 	return xc.PodControl.DeletePod(pod.Namespace, pod.Name, job.(*v1alpha1.XGBoostJob))
@@ -223,7 +226,7 @@ func isNonGangSchedulerSet(xgjob *v1alpha1.XGBoostJob) bool {
 
 // GetPortFromPyTorchJob gets the port of pytorch container.
 func GetPortFromXGBoostJob(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostReplicaType) (int32, error) {
-	containers := job.Spec.XGBoostReplicaSpecs[rtype].Template.Spec.Containers
+	containers := job.Spec.XGBoostReplicaSpecs[common.ReplicaType(rtype)].Template.Spec.Containers
 	for _, container := range containers {
 		if container.Name == v1alpha1.DefaultContainerName {
 			ports := container.Ports
@@ -241,36 +244,9 @@ func GetPortFromXGBoostJob(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostRepli
 // It also reconciles ControllerRef by adopting/orphaning.
 // Note that the returned Pods are pointers into the cache.
 func (xc *XGBoostController) GetPodsForJob(job metav1.Object) ([]*corev1.Pod, error) {
-	// Create selector.
-	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: xc.GenLabels(job.GetName()),
-	})
 
-	if err != nil {
-		return nil, fmt.Errorf("couldn't convert Job selector: %v", err)
-	}
-	// List all pods to include those that don't match the selector anymore
-	// but have a ControllerRef pointing to this controller.
-	pods, err := xc.PodLister.Pods(job.GetNamespace()).List(labels.Everything())
-	if err != nil {
-		return nil, err
-	}
-
-	// If any adoptions are attempted, we should first recheck for deletion
-	// with an uncached quorum read sometime after listing Pods (see #42639).
-
-	canAdoptFunc := RecheckDeletionTimestamp(func() (metav1.Object, error) {
-		fresh, err := xc.Controller.GetJobFromAPIClient(job.GetNamespace(), job.GetName())
-		if err != nil {
-			return nil, err
-		}
-		if fresh.GetUID() != job.GetUID() {
-			return nil, fmt.Errorf("original Job %v/%v is gone: got uid %v, wanted %v", job.GetNamespace(), job.GetName(), fresh.GetUID(), job.GetUID())
-		}
-		return fresh, nil
-	})
-	cm := controller.NewPodControllerRefManager(xc.PodControl, job, selector, xc.Controller.GetAPIGroupVersionKind(), canAdoptFunc)
-	return cm.ClaimPods(pods)
+	///TODO
+	return nil, nil
 }
 
 
