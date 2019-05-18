@@ -21,7 +21,7 @@ func NewXGBoostJob(worker int) *v1alpha1.XGBoostJob {
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: v1alpha1.XGBoostJobSpec{
-			XGBoostReplicaSpecs: make(map[v1alpha1.XGBoostReplicaType]*common.ReplicaSpec),
+			XGBoostReplicaSpecs: make(map[common.ReplicaType]*common.ReplicaSpec),
 		},
 	}
 
@@ -31,7 +31,7 @@ func NewXGBoostJob(worker int) *v1alpha1.XGBoostJob {
 			Replicas: &worker,
 			Template: NewXGBoostReplicaSpecTemplate(),
 		}
-		job.Spec.XGBoostReplicaSpecs[v1alpha1.XGBoostReplicaTypeWorker] = workerReplicaSpec
+		job.Spec.XGBoostReplicaSpecs[common.ReplicaType(v1alpha1.XGBoostReplicaTypeWorker)] = workerReplicaSpec
 	}
 
 	return job
@@ -39,7 +39,7 @@ func NewXGBoostJob(worker int) *v1alpha1.XGBoostJob {
 
 func NewXGBoostJobWithMaster(worker int) *v1alpha1.XGBoostJob {
 	job := NewXGBoostJob(worker)
-	job.Spec.XGBoostReplicaSpecs[v1alpha1.XGBoostReplicaTypeMaster] = &common.ReplicaSpec{
+	job.Spec.XGBoostReplicaSpecs[common.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster)] = &common.ReplicaSpec{
 		Template: NewXGBoostReplicaSpecTemplate(),
 	}
 	return job
