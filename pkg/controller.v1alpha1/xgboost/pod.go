@@ -44,7 +44,7 @@ const (
 	// policy is set in pod template.
 	podTemplateRestartPolicyReason = "SettedPodTemplateRestartPolicy"
 
-	exitedWithCodeReason           = "ExitedWithCode"
+	// exitedWithCodeReason           = "ExitedWithCode"
 
 	// podTemplateSchedulerNameReason is the warning reason when other scheduler name is set
 	// in pod templates with gang-scheduling enabled

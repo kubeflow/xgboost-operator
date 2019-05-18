@@ -53,7 +53,11 @@ func TestAddPod(t *testing.T) {
 
 	stopCh := make(chan struct{})
 	run := func(<-chan struct{}) {
-		ctr.Run(ThreadCount, stopCh)
+		err := ctr.Run(ThreadCount, stopCh)
+		if err != nil {
+			t.Errorf("Failed to run thread count: %v", err)
+		}
+
 	}
 	go run(stopCh)
 

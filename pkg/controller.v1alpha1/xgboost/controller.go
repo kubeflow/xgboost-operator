@@ -46,8 +46,8 @@ const (
 	// labels for pods and servers.
 	replicaTypeLabel    = "xgboost-replica-type"
 	replicaIndexLabel   = "xgboost-replica-index"
-	labelGroupName      = "group-name"
-	labelXGBoostJobName = "xgboost-job-name"
+	// labelGroupName      = "group-name"
+	// labelXGBoostJobName = "xgboost-job-name"
 	labelXGBoostJobRole = "xgboost-job-role"
 )
 
@@ -282,7 +282,7 @@ func (xc *XGBoostController) syncXGBoostJob(key string) (bool, error) {
 
 	var reconcileXGBoostJobsErr error
 	if jobNeedsSync && job.DeletionTimestamp == nil {
-		reconcileXGBoostJobsErr = xc.ReconcileJobs(
+		reconcileXGBoostJobsErr = xc.reconcileXGBoostJobs(
 			job, job.Spec.XGBoostReplicaSpecs, job.Status, job.Spec.RunPolicy)
 	}
 
@@ -332,7 +332,7 @@ func (xc *XGBoostController) reconcileXGBoostJobs(
 }
 
 func (XGBoostController) ControllerName() string {
-	return "xgb-operator"
+	return controllerName
 }
 
 func (XGBoostController) GetAPIGroupVersionKind() schema.GroupVersionKind {
