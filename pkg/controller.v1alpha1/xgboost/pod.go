@@ -24,15 +24,15 @@ import (
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	common "github.com/kubeflow/common/operator/v1"
-	"github.com/kubeflow/tf-operator/pkg/common/jobcontroller"
-	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
+	util "github.com/kubeflow/common/job_controller"
+	"github.com/kubeflow/common/job_controller"
+	pylogger "github.com/kubeflow/common/util"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	pylogger "github.com/kubeflow/tf-operator/pkg/logger"
-
+	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
 )
 
 const (
@@ -43,8 +43,6 @@ const (
 	// podTemplateRestartPolicyReason is the warning reason when the restart
 	// policy is set in pod template.
 	podTemplateRestartPolicyReason = "SettedPodTemplateRestartPolicy"
-
-	// exitedWithCodeReason           = "ExitedWithCode"
 
 	// podTemplateSchedulerNameReason is the warning reason when other scheduler name is set
 	// in pod templates with gang-scheduling enabled
@@ -70,12 +68,12 @@ func (xc *XGBoostController) DeleteService(job interface{}, name string, namespa
 func (xc *XGBoostController) CreateNewPod(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostReplicaType, index string, spec *common.ReplicaSpec, masterRole bool) error {
 
 	rt := strings.ToLower(string(rtype))
-	jobKey, err := KeyFunc(job)
+	jobKey, err := job_controller.KeyFunc(job)
 	if err != nil {
 		utilruntime.HandleError(fmt.Errorf("couldn't get key for job object %#v: %v", job, err))
 		return err
 	}
-	expectationPodsKey := jobcontroller.GenExpectationPodsKey(jobKey, rt)
+	expectationPodsKey := util.GenExpectationPodsKey(jobKey, rt)
 	err = xc.Expectations.ExpectCreations(expectationPodsKey, 1)
 	if err != nil {
 		return err
@@ -95,7 +93,7 @@ func (xc *XGBoostController) CreateNewPod(job *v1alpha1.XGBoostJob, rtype v1alph
 	podTemplate := spec.Template.DeepCopy()
 	totalReplicas := k8sutil.GetTotalReplicas(job.Spec.XGBoostReplicaSpecs)
 	// Set name for the template.
-	podTemplate.Name = jobcontroller.GenGeneralName(job.Name, rt, index)
+	podTemplate.Name = util.GenGeneralName(job.Name, rt, index)
 
 	if podTemplate.Labels == nil {
 		podTemplate.Labels = make(map[string]string)
@@ -168,7 +166,7 @@ func setClusterSpec(podTemplateSpec *corev1.PodTemplateSpec, job *v1alpha1.XGBoo
 		return err
 	}
 
-	masterAddr := jobcontroller.GenGeneralName(job.Name, strings.ToLower(string(v1alpha1.XGBoostReplicaTypeMaster)), strconv.Itoa(0))
+	masterAddr := util.GenGeneralName(job.Name, strings.ToLower(string(v1alpha1.XGBoostReplicaTypeMaster)), strconv.Itoa(0))
 	if rtype == v1alpha1.XGBoostReplicaTypeMaster {
 		if rank != 0 {
 			return errors.New("invalid config: There should be only a single master with index=0")

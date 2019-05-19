@@ -8,15 +8,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/controller"
 
-	"github.com/kubeflow/tf-operator/pkg/control"
+	control "github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/xgboost-operator/cmd/xgboost-operator.v1alpha1/app/options"
 	jobclientset "github.com/kubeflow/xgboost-operator/pkg/client/clientset/versioned"
 	jobinformers "github.com/kubeflow/xgboost-operator/pkg/client/informers/externalversions"
-)
-
-var (
-	// jobRunning   = common.JobRunning
-	// jobSucceeded = common.JobSucceeded
 )
 
 func newXGBoostController(

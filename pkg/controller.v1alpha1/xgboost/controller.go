@@ -46,17 +46,7 @@ const (
 	// labels for pods and servers.
 	replicaTypeLabel    = "xgboost-replica-type"
 	replicaIndexLabel   = "xgboost-replica-index"
-	// labelGroupName      = "group-name"
-	// labelXGBoostJobName = "xgboost-job-name"
 	labelXGBoostJobRole = "xgboost-job-role"
-)
-
-var (
-	// KeyFunc is the short name to DeletionHandlingMetaNamespaceKeyFunc.
-	// IndexerInformer uses a delta queue, therefore for deletes we have to use this
-	// key function but it should be just fine for non delete events.
-	KeyFunc = cache.DeletionHandlingMetaNamespaceKeyFunc
-
 )
 
 type XGBoostController struct {

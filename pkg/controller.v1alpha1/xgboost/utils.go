@@ -5,6 +5,7 @@ import (
 	"time"
 	"strings"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboost/v1alpha1"
+	jobcontroller "github.com/kubeflow/common/job_controller"
 )
 
 const (
@@ -36,7 +37,7 @@ func GenLabels(jobName string) map[string]string {
 }
 
 func GetKey(job *v1alpha1.XGBoostJob, t *testing.T) string {
-	key, err := KeyFunc(job)
+	key, err := jobcontroller.KeyFunc(job)
 	if err != nil {
 		t.Errorf("Unexpected error getting key for job %v: %v", job.Name, err)
 		return ""
