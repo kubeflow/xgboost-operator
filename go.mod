@@ -26,15 +26,15 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.6
+	github.com/kubeflow/common v0.0.0-20190517141806-48d498ab85e1
 	github.com/markbates/inflect v1.0.4
 	github.com/matttproud/golang_protobuf_extensions v1.0.1
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
-	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/modern-go/reflect2 v1.0.1
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709
 	github.com/petar/GoLLRB v0.0.0-20190514000832-33fb24c13b99
-	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.3
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
