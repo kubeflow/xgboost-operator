@@ -1,0 +1,17 @@
+# Files created by Gogland IDE
+.idea/
+
+# Other temporary files
+.DS_Store
+
+# Compiled python files.
+*.pyc
+
+# Emacs temporary files
+*~
+
+# VIM temporary files.
+.swp
+
+
+vendor/
