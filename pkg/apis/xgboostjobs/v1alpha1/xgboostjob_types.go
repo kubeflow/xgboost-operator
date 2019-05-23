@@ -16,6 +16,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	common "github.com/kubeflow/common/operator/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -24,14 +25,17 @@ import (
 
 // XGBoostJobSpec defines the desired state of XGBoostJob
 type XGBoostJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// RunPolicy encapsulates various runtime policies of the distributed training
+	RunPolicy *common.RunPolicy `json:",inline"`
+
+	// XGBoostReplicaSpecs specifies the XGBoost replicas to run.
+	XGBoostReplicaSpecs map[common.ReplicaType]*common.ReplicaSpec `json:"xgboostReplicaSpec"`
 }
 
 // XGBoostJobStatus defines the observed state of XGBoostJob
 type XGBoostJobStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	//XGBoostJob Status
+	common.JobStatus `json:",inline"`
 }
 
 // +genclient

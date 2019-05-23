@@ -10,6 +10,22 @@
   version = "v0.39.0"
 
 [[projects]]
+  digest = "1:bd3632deea7c224314b504dc51fbd244a59163e89c0cb730877d51bb13f5f74a"
+  name = "github.com/PuerkitoBio/purell"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "44968752391892e1b0d0b821ee79e9a85fa13049"
+  version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c739832d67eb1e9cc478a19cc1a1ccd78df0397bf8a32978b759152e205f644b"
+  name = "github.com/PuerkitoBio/urlesc"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "de5bf2ad457846296e2031421a34e2568e304e35"
+
+[[projects]]
   digest = "1:464aef731a5f82ded547c62e249a2e9ec59fbbc9ddab53cda7b9857852630a61"
   name = "github.com/appscode/jsonpatch"
   packages = ["."]
@@ -67,6 +83,38 @@
   pruneopts = "T"
   revision = "03f06a783fbb7dfaf3f629c7825480e43a7105e6"
   version = "v0.1.1"
+
+[[projects]]
+  digest = "1:701ec53dfa0182bf25e5c09e664906f11d697e779b59461a2607dbd4dc75a4f9"
+  name = "github.com/go-openapi/jsonpointer"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "ef5f0afec364d3b9396b7b77b43dbe26bf1f8004"
+  version = "v0.19.0"
+
+[[projects]]
+  digest = "1:3f17ebd557845adeb347c9e398394e96ebc18e0ec94cc04972be87851a4679e0"
+  name = "github.com/go-openapi/jsonreference"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "8483a886a90412cd6858df4ea3483dce9c8e35a3"
+  version = "v0.19.0"
+
+[[projects]]
+  digest = "1:40910b9a3f0c63bcbb9da11fe471a95899dc0e139284bd892ac18819a37bbfc5"
+  name = "github.com/go-openapi/spec"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "53d776530bf78a11b03a7b52dd8a083086b045e5"
+  version = "v0.19.0"
+
+[[projects]]
+  digest = "1:8d6ff454d55699bfcfdc2ef77547defda00f7531e4b6c4483e5606b749255168"
+  name = "github.com/go-openapi/swag"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "b3e2804c8535ee0d1b89320afd98474d5b8e9e3b"
+  version = "v0.19.0"
 
 [[projects]]
   digest = "1:92755a73daaa2397bbd4fd7b14d920decd24c0669b1d58db7e4ef986b1934e5f"
@@ -212,6 +260,26 @@
   pruneopts = "T"
   revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
   version = "v1.1.6"
+
+[[projects]]
+  branch = "master"
+  digest = "1:40b44d570c1c313ca76bc264538877e7a84901dc2bd388d1fb70dbcb932e46ea"
+  name = "github.com/kubeflow/common"
+  packages = ["operator/v1"]
+  pruneopts = "T"
+  revision = "48d498ab85e1ff26b75c2a3023d77b465ca25ca8"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d594a6358158ddbd8996cefe7982228a1f57a6d0f27b6ea71b7e04cf578170aa"
+  name = "github.com/mailru/easyjson"
+  packages = [
+    "buffer",
+    "jlexer",
+    "jwriter",
+  ]
+  pruneopts = "T"
+  revision = "1ea4449da9834f4d333f1cc461c374aea217d249"
 
 [[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
@@ -523,6 +591,7 @@
     "unicode/cldr",
     "unicode/norm",
     "unicode/rangetable",
+    "width",
   ]
   pruneopts = "T"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
@@ -843,7 +912,10 @@
   branch = "master"
   digest = "1:0d71095d5349eb9a451d32608f753d36ba89b9eae93c3cedb0325a62fff67cfb"
   name = "k8s.io/kube-openapi"
-  packages = ["pkg/util/proto"]
+  packages = [
+    "pkg/common",
+    "pkg/util/proto",
+  ]
   pruneopts = "T"
   revision = "a01b7d5d6c2258c80a4a10070f3dee9cd575d9c7"
 
@@ -936,6 +1008,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/emicklei/go-restful",
+    "github.com/kubeflow/common/operator/v1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "golang.org/x/net/context",

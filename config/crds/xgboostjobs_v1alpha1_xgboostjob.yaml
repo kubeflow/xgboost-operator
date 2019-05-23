@@ -27,8 +27,72 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            xgboostReplicaSpec:
+              description: XGBoostReplicaSpecs specifies the XGBoost replicas to run.
+              type: object
+          required:
+          - xgboostReplicaSpec
           type: object
         status:
+          properties:
+            completionTime:
+              description: Represents time when the job was completed. It is not guaranteed
+                to be set in happens-before order across separate operations. It is
+                represented in RFC3339 form and is in UTC.
+              format: date-time
+              type: string
+            conditions:
+              description: Conditions is an array of current observed job conditions.
+              items:
+                properties:
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of job condition.
+                    type: string
+                required:
+                - type
+                - status
+                type: object
+              type: array
+            lastReconcileTime:
+              description: Represents last time when the job was reconciled. It is
+                not guaranteed to be set in happens-before order across separate operations.
+                It is represented in RFC3339 form and is in UTC.
+              format: date-time
+              type: string
+            replicaStatuses:
+              description: ReplicaStatuses is map of ReplicaType and ReplicaStatus,
+                specifies the status of each replica.
+              type: object
+            startTime:
+              description: Represents time when the job was acknowledged by the job
+                controller. It is not guaranteed to be set in happens-before order
+                across separate operations. It is represented in RFC3339 form and
+                is in UTC.
+              format: date-time
+              type: string
+          required:
+          - conditions
+          - replicaStatuses
           type: object
   version: v1alpha1
 status:
