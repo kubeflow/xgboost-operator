@@ -16,6 +16,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "github.com/kubeflow/common/operator/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -57,7 +58,17 @@ var _ = Describe("XGBoostJob", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+				Spec: XGBoostJobSpec{
+					XGBReplicaSpecs: map[v1.ReplicaType]*v1.ReplicaSpec{},
+				},
+				Status: XGBoostJobStatus{
+					JobStatus: v1.JobStatus{
+						ReplicaStatuses: map[v1.ReplicaType]*v1.ReplicaStatus{},
+						Conditions:      []v1.JobCondition{},
+					},
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
