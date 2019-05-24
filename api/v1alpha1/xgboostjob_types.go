@@ -16,6 +16,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "github.com/kubeflow/common/operator/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,12 +27,24 @@ import (
 type XGBoostJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	v1.RunPolicy `json:",inline"`
+
+	// XDLReplicaSpecs is map of ReplicaType and ReplicaSpec
+	// specifies the XDL replicas to run.
+	// For example,
+	//   {
+	//     "PS": ReplicaSpec,
+	//     "Worker": ReplicaSpec,
+	//   }
+	XGBReplicaSpecs map[v1.ReplicaType]*v1.ReplicaSpec `json:"xgbReplicaSpecs"`
+
 }
 
 // XGBoostJobStatus defines the observed state of XGBoostJob
 type XGBoostJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	v1.JobStatus `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
