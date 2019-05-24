@@ -13,8 +13,9 @@ install:
 
 script:
   - export GO111MODULE=on
+  - export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=300s
   - make
-  - go build ./cmd/xgboost-operator.v1alpha1
+  - go build ./...
   - go test ./...
   # - golangci-lint run ./...
   # TODO: add goveralls task
