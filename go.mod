@@ -1,4 +1,4 @@
-module github.com/kubeflow/xgboost
+module github.com/kubeflow/xgboost-operator
 
 go 1.12
 
