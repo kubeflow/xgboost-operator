@@ -22,7 +22,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	xgboostjobv1alpha1 "github.com/kubeflow/xgboost/api/v1alpha1"
+	xgboostjobv1alpha1 "github.com/kubeflow/xgboost-operator/api/v1alpha1"
 )
 
 // XGBoostJobReconciler reconciles a XGBoostJob object

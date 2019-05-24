@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	xgboostjobv1alpha1 "github.com/kubeflow/xgboost/api/v1alpha1"
+	xgboostjobv1alpha1 "github.com/kubeflow/xgboost-operator/api/v1alpha1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"

@@ -19,8 +19,8 @@ import (
 	"flag"
 	"os"
 
-	xgboostjobv1alpha1 "github.com/kubeflow/xgboost/api/v1alpha1"
-	"github.com/kubeflow/xgboost/controllers"
+	xgboostjobv1alpha1 "github.com/kubeflow/xgboost-operator/api/v1alpha1"
+	"github.com/kubeflow/xgboost-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
