@@ -18,7 +18,7 @@ import (
 	"net"
 	"os"
 
-	commonv1 "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -123,7 +123,7 @@ func FilterPodCount(pods []*v1.Pod, phase v1.PodPhase) int32 {
 	return result
 }
 
-func GetTotalReplicas(replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec) int32 {
+func GetTotalReplicas(replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec) int32 {
 	jobReplicas := int32(0)
 	for _, r := range replicas {
 		jobReplicas += *r.Replicas
@@ -131,7 +131,7 @@ func GetTotalReplicas(replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec) i
 	return jobReplicas
 }
 
-func GetTotalFailedReplicas(replicas map[commonv1.ReplicaType]*commonv1.ReplicaStatus) int32 {
+func GetTotalFailedReplicas(replicas map[apiv1.ReplicaType]*apiv1.ReplicaStatus) int32 {
 	totalFailedReplicas := int32(0)
 	for _, status := range replicas {
 		totalFailedReplicas += status.Failed

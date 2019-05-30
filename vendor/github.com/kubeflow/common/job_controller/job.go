@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	common "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	commonutil "github.com/kubeflow/common/util"
 	"github.com/kubeflow/common/util/k8sutil"
 	log "github.com/sirupsen/logrus"
@@ -16,18 +16,18 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )
 
-func (jc *JobController) deletePodsAndServices(runPolicy *common.RunPolicy, job interface{}, pods []*v1.Pod) error {
+func (jc *JobController) deletePodsAndServices(runPolicy *apiv1.RunPolicy, job interface{}, pods []*v1.Pod) error {
 	if len(pods) == 0 {
 		return nil
 	}
 
 	// Delete nothing when the cleanPodPolicy is None.
-	if *runPolicy.CleanPodPolicy == common.CleanPodPolicyNone {
+	if *runPolicy.CleanPodPolicy == apiv1.CleanPodPolicyNone {
 		return nil
 	}
 
 	for _, pod := range pods {
-		if *runPolicy.CleanPodPolicy == common.CleanPodPolicyRunning && pod.Status.Phase != v1.PodRunning {
+		if *runPolicy.CleanPodPolicy == apiv1.CleanPodPolicyRunning && pod.Status.Phase != v1.PodRunning {
 			continue
 		}
 		if err := jc.Controller.DeletePod(job, pod); err != nil {
@@ -41,7 +41,7 @@ func (jc *JobController) deletePodsAndServices(runPolicy *common.RunPolicy, job 
 	return nil
 }
 
-func (jc *JobController) cleanupJobIfTTL(runPolicy *common.RunPolicy, jobStatus common.JobStatus, job interface{}) error {
+func (jc *JobController) cleanupJobIfTTL(runPolicy *apiv1.RunPolicy, jobStatus apiv1.JobStatus, job interface{}) error {
 	currentTime := time.Now()
 	metaObject, _ := job.(metav1.Object)
 	ttl := runPolicy.TTLSecondsAfterFinished
@@ -71,9 +71,9 @@ func (jc *JobController) cleanupJobIfTTL(runPolicy *common.RunPolicy, jobStatus 
 // It will requeue the job in case of an error while creating/deleting pods/services.
 func (jc *JobController) ReconcileJobs(
 	job interface{},
-	replicas map[common.ReplicaType]*common.ReplicaSpec,
-	jobStatus common.JobStatus,
-	runPolicy *common.RunPolicy) error {
+	replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec,
+	jobStatus apiv1.JobStatus,
+	runPolicy *apiv1.RunPolicy) error {
 
 	metaObject, ok := job.(metav1.Object)
 	jobName := metaObject.GetName()
@@ -93,14 +93,14 @@ func (jc *JobController) ReconcileJobs(
 
 	oldStatus := jobStatus.DeepCopy()
 
-	pods, err := jc.GetPodsForJob(metaObject)
+	pods, err := jc.Controller.GetPodsForJob(job)
 
 	if err != nil {
 		log.Warnf("GetPodsForJob error %v", err)
 		return err
 	}
 
-	services, err := jc.GetServicesForJob(metaObject)
+	services, err := jc.Controller.GetServicesForJob(job)
 
 	if err != nil {
 		log.Warnf("GetServicesForJob error %v", err)
@@ -172,7 +172,7 @@ func (jc *JobController) ReconcileJobs(
 				now := metav1.Now()
 				jobStatus.CompletionTime = &now
 			}
-			err := commonutil.UpdateJobConditions(&jobStatus, common.JobFailed, commonutil.JobFailedReason, failureMessage)
+			err := commonutil.UpdateJobConditions(&jobStatus, apiv1.JobFailed, commonutil.JobFailedReason, failureMessage)
 			if err != nil {
 				log.Infof("Append job condition error: %v", err)
 				return err
@@ -210,7 +210,7 @@ func (jc *JobController) ReconcileJobs(
 		}
 	}
 
-	err = jc.Controller.UpdateJobStatus(job, replicas, &jobStatus)
+	err = jc.Controller.UpdateJobStatus(job, replicas, jobStatus)
 	if err != nil {
 		log.Warnf("UpdateJobStatus error %v", err)
 		return err
@@ -223,7 +223,7 @@ func (jc *JobController) ReconcileJobs(
 }
 
 // pastActiveDeadline checks if job has ActiveDeadlineSeconds field set and if it is exceeded.
-func (jc *JobController) pastActiveDeadline(runPolicy *common.RunPolicy, jobStatus common.JobStatus) bool {
+func (jc *JobController) pastActiveDeadline(runPolicy *apiv1.RunPolicy, jobStatus apiv1.JobStatus) bool {
 	if runPolicy.ActiveDeadlineSeconds == nil || jobStatus.StartTime == nil {
 		return false
 	}
@@ -236,14 +236,14 @@ func (jc *JobController) pastActiveDeadline(runPolicy *common.RunPolicy, jobStat
 
 // pastBackoffLimit checks if container restartCounts sum exceeds BackoffLimit
 // this method applies only to pods with restartPolicy == OnFailure or Always
-func (jc *JobController) pastBackoffLimit(jobName string, runPolicy *common.RunPolicy,
-	replicas map[common.ReplicaType]*common.ReplicaSpec, pods []*v1.Pod) (bool, error) {
+func (jc *JobController) pastBackoffLimit(jobName string, runPolicy *apiv1.RunPolicy,
+	replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec, pods []*v1.Pod) (bool, error) {
 	if runPolicy.BackoffLimit == nil {
 		return false, nil
 	}
 	result := int32(0)
 	for rtype, spec := range replicas {
-		if spec.RestartPolicy != common.RestartPolicyOnFailure && spec.RestartPolicy != common.RestartPolicyAlways {
+		if spec.RestartPolicy != apiv1.RestartPolicyOnFailure && spec.RestartPolicy != apiv1.RestartPolicyAlways {
 			log.Warnf("The restart policy of replica %v of the job %v is not OnFailure or Always. Not counted in backoff limit.", rtype, jobName)
 			continue
 		}
@@ -275,7 +275,7 @@ func (jc *JobController) pastBackoffLimit(jobName string, runPolicy *common.RunP
 	return result >= *runPolicy.BackoffLimit, nil
 }
 
-func (jc *JobController) cleanupJob(runPolicy *common.RunPolicy, jobStatus common.JobStatus, job interface{}) error {
+func (jc *JobController) cleanupJob(runPolicy *apiv1.RunPolicy, jobStatus apiv1.JobStatus, job interface{}) error {
 	currentTime := time.Now()
 	metaObject, _ := job.(metav1.Object)
 	ttl := runPolicy.TTLSecondsAfterFinished

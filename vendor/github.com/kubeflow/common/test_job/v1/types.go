@@ -15,7 +15,7 @@
 package v1
 
 import (
-	common "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -37,17 +37,17 @@ type TestJob struct {
 	// This data may not be up to date.
 	// Populated by the system.
 	// Read-only.
-	Status common.JobStatus `json:"status,omitempty"`
+	Status apiv1.JobStatus `json:"status,omitempty"`
 }
 
 // TestJobSpec is a desired state description of the TestJob.
 type TestJobSpec struct {
-	RunPolicy *common.RunPolicy `json:"runPolicy,omitempty"`
-	TestReplicaSpecs map[TestReplicaType]*common.ReplicaSpec `json:"testReplicaSpecs"`
+	RunPolicy *apiv1.RunPolicy                              `json:"runPolicy,omitempty"`
+	TestReplicaSpecs map[TestReplicaType]*apiv1.ReplicaSpec `json:"testReplicaSpecs"`
 }
 
 // TestReplicaType is the type for TestReplica.
-type TestReplicaType common.ReplicaType
+type TestReplicaType apiv1.ReplicaType
 
 const (
 	TestReplicaTypeWorker TestReplicaType = "Worker"

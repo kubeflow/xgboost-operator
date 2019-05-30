@@ -15,7 +15,7 @@
 package v1
 
 import (
-	common "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 )
 
 const (
@@ -29,5 +29,5 @@ const (
 	// DefaultPort is default value of the port.
 	DefaultPort = 2222
 	// DefaultRestartPolicy is default RestartPolicy for TFReplicaSpec.
-	DefaultRestartPolicy = common.RestartPolicyNever
+	DefaultRestartPolicy = apiv1.RestartPolicyNever
 )

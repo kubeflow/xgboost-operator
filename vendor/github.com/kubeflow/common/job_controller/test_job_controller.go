@@ -1,19 +1,28 @@
 package job_controller
 
 import (
-	commonv1 "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	testv1 "github.com/kubeflow/common/test_job/v1"
-	"github.com/kubeflow/common/util"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+var _  apiv1.ControllerInterface = &TestJobController{}
+
 type TestJobController struct {
 	job      *testv1.TestJob
 	pods     []*corev1.Pod
 	services []*corev1.Service
+}
+
+func (t TestJobController) GetPodsForJob(job interface{}) ([]*corev1.Pod, error) {
+	return []*corev1.Pod{}, nil
+}
+
+func (t TestJobController) GetServicesForJob(job interface{}) ([]*corev1.Service, error) {
+	return []*corev1.Service{}, nil
 }
 
 func (TestJobController) ControllerName() string {
@@ -33,7 +42,7 @@ func (TestJobController) GetGroupNameLabelValue() string {
 }
 
 func (TestJobController) GetJobRoleKey() string {
-	return util.LabelJobRole
+	return apiv1.JobRoleLabel
 }
 
 func (TestJobController) GetDefaultContainerPortNumber() string {
@@ -54,11 +63,12 @@ func (t *TestJobController) DeleteJob(job interface{}) error {
 	return nil
 }
 
-func (t *TestJobController) UpdateJobStatus(job interface{}, replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec, jobStatus *commonv1.JobStatus) error {
+func (t TestJobController) UpdateJobStatus(job interface{}, replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec,
+	jobStatus apiv1.JobStatus) error {
 	return nil
 }
 
-func (t *TestJobController) UpdateJobStatusInApiServer(job interface{}, jobStatus *commonv1.JobStatus) error {
+func (t *TestJobController) UpdateJobStatusInApiServer(job interface{}, jobStatus *apiv1.JobStatus) error {
 	return nil
 }
 
@@ -78,7 +88,7 @@ func (t *TestJobController) DeleteService(job interface{}, name string, namespac
 	return nil
 }
 
-func (t *TestJobController) CreatePod(job interface{}, podTemplate *corev1.PodTemplateSpec) error {
+func (t *TestJobController) CreatePod(job interface{}, pod *corev1.Pod) error {
 	return nil
 }
 
@@ -102,6 +112,6 @@ func (t *TestJobController) GetDefaultContainerName() string {
 	return "default-container"
 }
 
-func (t *TestJobController) IsMasterRole(replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec, rtype commonv1.ReplicaType, index int) bool {
+func (t *TestJobController) IsMasterRole(replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec, rtype apiv1.ReplicaType, index int) bool {
 	return true
 }

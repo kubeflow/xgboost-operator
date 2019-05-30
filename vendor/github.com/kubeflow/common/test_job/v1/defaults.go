@@ -17,7 +17,7 @@ package v1
 import (
 	"strings"
 
-	common "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -57,7 +57,7 @@ func setDefaultPort(spec *v1.PodSpec) {
 	}
 }
 
-func setDefaultReplicas(spec *common.ReplicaSpec) {
+func setDefaultReplicas(spec *apiv1.ReplicaSpec) {
 	if spec.Replicas == nil {
 		spec.Replicas = Int32(1)
 	}
@@ -89,7 +89,7 @@ func setTypeNameToCamelCase(testJob *TestJob, typ TestReplicaType) {
 func SetDefaults_TestJob(testjob *TestJob) {
 	// Set default cleanpod policy to Running.
 	if testjob.Spec.RunPolicy.CleanPodPolicy == nil {
-		running := common.CleanPodPolicyRunning
+		running := apiv1.CleanPodPolicyRunning
 		testjob.Spec.RunPolicy.CleanPodPolicy = &running
 	}
 
