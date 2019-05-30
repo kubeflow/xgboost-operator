@@ -13,6 +13,6 @@ install:
 
 script:
   - export GO111MODULE=on
-  - go build ./cmd/xgboost-operator.v1alpha1
-  - golangci-lint run ./...
-  - goveralls -service=travis-ci -v -package ./... -ignore "pkg/client/*/*.go,pkg/client/*/*/*.go,pkg/client/*/*/*/*.go,pkg/client/*/*/*/*/*.go,pkg/client/*/*/*/*/*/*.go,pkg/client/*/*/*/*/*/*/*.go,pkg/apis/xgboost/v1alpha1/zz_generated.*.go"
+  - go build ./...
+  # - golangci-lint run ./...
+  # - goveralls -service=travis-ci -v -package ./... -ignore "pkg/client/*/*.go,pkg/client/*/*/*.go,pkg/client/*/*/*/*.go,pkg/client/*/*/*/*/*.go,pkg/client/*/*/*/*/*/*.go,pkg/client/*/*/*/*/*/*/*.go,pkg/apis/xgboost/v1alpha1/zz_generated.*.go"

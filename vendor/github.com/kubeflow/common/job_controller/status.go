@@ -1,21 +1,21 @@
 package job_controller
 
 import (
-	"github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // initializeReplicaStatuses initializes the ReplicaStatuses for replica.
-func initializeReplicaStatuses(jobStatus *v1.JobStatus, rtype v1.ReplicaType) {
+func initializeReplicaStatuses(jobStatus *apiv1.JobStatus, rtype apiv1.ReplicaType) {
 	if jobStatus.ReplicaStatuses == nil {
-		jobStatus.ReplicaStatuses = make(map[v1.ReplicaType]*v1.ReplicaStatus)
+		jobStatus.ReplicaStatuses = make(map[apiv1.ReplicaType]*apiv1.ReplicaStatus)
 	}
 
-	jobStatus.ReplicaStatuses[rtype] = &v1.ReplicaStatus{}
+	jobStatus.ReplicaStatuses[rtype] = &apiv1.ReplicaStatus{}
 }
 
 // updateJobReplicaStatuses updates the JobReplicaStatuses according to the pod.
-func updateJobReplicaStatuses(jobStatus *v1.JobStatus, rtype v1.ReplicaType, pod *corev1.Pod) {
+func updateJobReplicaStatuses(jobStatus *apiv1.JobStatus, rtype apiv1.ReplicaType, pod *corev1.Pod) {
 	switch pod.Status.Phase {
 	case corev1.PodRunning:
 		jobStatus.ReplicaStatuses[rtype].Active++

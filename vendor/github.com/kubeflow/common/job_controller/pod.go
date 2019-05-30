@@ -20,9 +20,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/glog"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,7 +32,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/kubernetes/pkg/controller"
 
-	common "github.com/kubeflow/common/operator/v1"
+	apiv1 "github.com/kubeflow/common/job_controller/api/v1"
 	commonutil "github.com/kubeflow/common/util"
 	trainutil "github.com/kubeflow/common/util/train"
 )
@@ -65,7 +67,7 @@ func (jc *JobController) AddPod(obj interface{}) {
 		logger := commonutil.LoggerForPod(pod, jc.Controller.GetAPIGroupVersionKind().Kind)
 
 		if job == nil {
-			if pod.Labels[commonutil.LabelGroupName] == jc.Controller.GetGroupNameLabelValue() {
+			if pod.Labels[apiv1.GroupNameLabel] == jc.Controller.GetGroupNameLabelValue() {
 				logger.Info("This pod's job does not exist")
 			}
 			return
@@ -77,12 +79,12 @@ func (jc *JobController) AddPod(obj interface{}) {
 			return
 		}
 
-		if _, ok := pod.Labels[commonutil.ReplicaTypeLabel]; !ok {
+		if _, ok := pod.Labels[apiv1.ReplicaTypeLabel]; !ok {
 			logger.Infof("This pod maybe not created by %v", jc.Controller.ControllerName())
 			return
 		}
 
-		rtype := pod.Labels[commonutil.ReplicaTypeLabel]
+		rtype := pod.Labels[apiv1.ReplicaTypeLabel]
 		expectationPodsKey := GenExpectationPodsKey(jobKey, rtype)
 
 		jc.Expectations.CreationObserved(expectationPodsKey)
@@ -178,12 +180,12 @@ func (jc *JobController) DeletePod(obj interface{}) {
 		return
 	}
 
-	if _, ok := pod.Labels[commonutil.ReplicaTypeLabel]; !ok {
+	if _, ok := pod.Labels[apiv1.ReplicaTypeLabel]; !ok {
 		logger.Infof("This pod maybe not created by %v", jc.Controller.ControllerName())
 		return
 	}
 
-	rtype := pod.Labels[commonutil.ReplicaTypeLabel]
+	rtype := pod.Labels[apiv1.ReplicaTypeLabel]
 	expectationPodsKey := GenExpectationPodsKey(jobKey, rtype)
 
 	jc.Expectations.DeletionObserved(expectationPodsKey)
@@ -191,41 +193,6 @@ func (jc *JobController) DeletePod(obj interface{}) {
 	jc.WorkQueue.Add(jobKey)
 }
 
-// getPodsForJob returns the set of pods that this job should manage.
-// It also reconciles ControllerRef by adopting/orphaning.
-// Note that the returned Pods are pointers into the cache.
-func (jc *JobController) GetPodsForJob(job metav1.Object) ([]*v1.Pod, error) {
-	// Create selector.
-	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: jc.GenLabels(job.GetName()),
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("couldn't convert Job selector: %v", err)
-	}
-	// List all pods to include those that don't match the selector anymore
-	// but have a ControllerRef pointing to this controller.
-	pods, err := jc.PodLister.Pods(job.GetNamespace()).List(labels.Everything())
-	if err != nil {
-		return nil, err
-	}
-
-	// If any adoptions are attempted, we should first recheck for deletion
-	// with an uncached quorum read sometime after listing Pods (see #42639).
-
-	canAdoptFunc := RecheckDeletionTimestamp(func() (metav1.Object, error) {
-		fresh, err := jc.Controller.GetJobFromAPIClient(job.GetNamespace(), job.GetName())
-		if err != nil {
-			return nil, err
-		}
-		if fresh.GetUID() != job.GetUID() {
-			return nil, fmt.Errorf("original Job %v/%v is gone: got uid %v, wanted %v", job.GetNamespace(), job.GetName(), fresh.GetUID(), job.GetUID())
-		}
-		return fresh, nil
-	})
-	cm := controller.NewPodControllerRefManager(jc.PodControl, job, selector, jc.Controller.GetAPIGroupVersionKind(), canAdoptFunc)
-	return cm.ClaimPods(pods)
-}
 
 // FilterPodsForReplicaType returns pods belong to a replicaType.
 func (jc *JobController) FilterPodsForReplicaType(pods []*v1.Pod, replicaType string) ([]*v1.Pod, error) {
@@ -235,7 +202,7 @@ func (jc *JobController) FilterPodsForReplicaType(pods []*v1.Pod, replicaType st
 		MatchLabels: make(map[string]string),
 	}
 
-	replicaSelector.MatchLabels[commonutil.ReplicaTypeLabel] = replicaType
+	replicaSelector.MatchLabels[apiv1.ReplicaTypeLabel] = replicaType
 
 	for _, pod := range pods {
 		selector, err := metav1.LabelSelectorAsSelector(replicaSelector)
@@ -254,11 +221,11 @@ func (jc *JobController) FilterPodsForReplicaType(pods []*v1.Pod, replicaType st
 func (jc *JobController) GetPodSlices(pods []*v1.Pod, replicas int, logger *log.Entry) [][]*v1.Pod {
 	podSlices := make([][]*v1.Pod, replicas)
 	for _, pod := range pods {
-		if _, ok := pod.Labels[commonutil.ReplicaIndexLabel]; !ok {
+		if _, ok := pod.Labels[apiv1.ReplicaIndexLabel]; !ok {
 			logger.Warning("The pod do not have the index label.")
 			continue
 		}
-		index, err := strconv.Atoi(pod.Labels[commonutil.ReplicaIndexLabel])
+		index, err := strconv.Atoi(pod.Labels[apiv1.ReplicaIndexLabel])
 		if err != nil {
 			logger.Warningf("Error when strconv.Atoi: %v", err)
 			continue
@@ -276,12 +243,12 @@ func (jc *JobController) GetPodSlices(pods []*v1.Pod, replicas int, logger *log.
 // It will requeue the job in case of an error while creating/deleting pods.
 func (jc *JobController) ReconcilePods(
 	job interface{},
-	jobStatus *common.JobStatus,
+	jobStatus *apiv1.JobStatus,
 	pods []*v1.Pod,
-	rtype common.ReplicaType,
-	spec *common.ReplicaSpec,
+	rtype apiv1.ReplicaType,
+	spec *apiv1.ReplicaSpec,
 	rstatus map[string]v1.PodPhase,
-	replicas map[common.ReplicaType]*common.ReplicaSpec) error {
+	replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec) error {
 
 	metaObject, ok := job.(metav1.Object)
 	if !ok {
@@ -332,7 +299,7 @@ func (jc *JobController) ReconcilePods(
 				}
 			}
 			// Check if the pod is retryable.
-			if spec.RestartPolicy == common.RestartPolicyExitCode {
+			if spec.RestartPolicy == apiv1.RestartPolicyExitCode {
 				if pod.Status.Phase == v1.PodFailed && trainutil.IsRetryableExitCode(exitCode) {
 					logger.Infof("Need to restart the pod: %v.%v", pod.Namespace, pod.Name)
 					if err := jc.Controller.DeletePod(job, pod); err != nil {
@@ -348,8 +315,8 @@ func (jc *JobController) ReconcilePods(
 }
 
 // createNewPod creates a new pod for the given index and type.
-func (jc *JobController) createNewPod(job interface{}, rt, index string, spec *common.ReplicaSpec, masterRole bool,
-	replicas map[common.ReplicaType]*common.ReplicaSpec) error {
+func (jc *JobController) createNewPod(job interface{}, rt, index string, spec *apiv1.ReplicaSpec, masterRole bool,
+	replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec) error {
 
 	metaObject, ok := job.(metav1.Object)
 	if !ok {
@@ -373,11 +340,11 @@ func (jc *JobController) createNewPod(job interface{}, rt, index string, spec *c
 
 	// Set type and index for the worker.
 	labels := jc.GenLabels(metaObject.GetName())
-	labels[commonutil.ReplicaTypeLabel] = rt
-	labels[commonutil.ReplicaIndexLabel] = index
+	labels[apiv1.ReplicaTypeLabel] = rt
+	labels[apiv1.ReplicaIndexLabel] = index
 
 	if masterRole {
-		labels[commonutil.LabelJobRole] = "master"
+		labels[apiv1.JobRoleLabel] = "master"
 	}
 
 	podTemplate := spec.Template.DeepCopy()
@@ -418,8 +385,9 @@ func (jc *JobController) createNewPod(job interface{}, rt, index string, spec *c
 			podTemplate.Spec.SchedulerName = gangSchedulerName
 		}
 	}
+	controllerRef := jc.GenOwnerReference(metaObject)
 
-	err = jc.Controller.CreatePod(job, podTemplate)
+	err = jc.createPodWithControllerRef(metaObject.GetNamespace(), podTemplate, runtimeObject, controllerRef)
 	if err != nil && errors.IsTimeout(err) {
 		// Pod is created but its initialization has timed out.
 		// If the initialization is successful eventually, the
@@ -435,16 +403,51 @@ func (jc *JobController) createNewPod(job interface{}, rt, index string, spec *c
 	return nil
 }
 
-func setRestartPolicy(podTemplateSpec *v1.PodTemplateSpec, spec *common.ReplicaSpec) {
+func (jc *JobController) createPodWithControllerRef(namespace string, template *v1.PodTemplateSpec,
+	controllerObject runtime.Object, controllerRef *metav1.OwnerReference) error {
+	if err := validateControllerRef(controllerRef); err != nil {
+		return err
+	}
+	return jc.createPod("", namespace, template, controllerObject, controllerRef)
+}
+
+func (jc *JobController) createPod(nodeName, namespace string, template *v1.PodTemplateSpec, object runtime.Object, controllerRef *metav1.OwnerReference) error {
+	pod, err := GetPodFromTemplate(template, object, controllerRef)
+	pod.Namespace = namespace
+	if err != nil {
+		return err
+	}
+	if len(nodeName) != 0 {
+		pod.Spec.NodeName = nodeName
+	}
+	if labels.Set(pod.Labels).AsSelectorPreValidated().Empty() {
+		return fmt.Errorf("unable to create pods, no labels")
+	}
+	if err := jc.Controller.CreatePod(object, pod); err != nil {
+		jc.Recorder.Eventf(object, v1.EventTypeWarning, FailedCreatePodReason, "Error creating: %v", err)
+		return err
+	} else {
+		accessor, err := meta.Accessor(object)
+		if err != nil {
+			glog.Errorf("parentObject does not have ObjectMeta, %v", err)
+			return nil
+		}
+		glog.V(4).Infof("Controller %v created pod %v", accessor.GetName(), pod.Name)
+		jc.Recorder.Eventf(object, v1.EventTypeNormal, SuccessfulCreatePodReason, "Created pod: %v", pod.Name)
+	}
+	return nil
+}
+
+func setRestartPolicy(podTemplateSpec *v1.PodTemplateSpec, spec *apiv1.ReplicaSpec) {
 	// This is necessary since restartPolicyExitCode is not supported in v1.PodTemplateSpec
-	if spec.RestartPolicy == common.RestartPolicyExitCode {
+	if spec.RestartPolicy == apiv1.RestartPolicyExitCode {
 		podTemplateSpec.Spec.RestartPolicy = v1.RestartPolicyNever
 	} else {
 		podTemplateSpec.Spec.RestartPolicy = v1.RestartPolicy(spec.RestartPolicy)
 	}
 }
 
-func isNonGangSchedulerSet(replicas map[common.ReplicaType]*common.ReplicaSpec) bool {
+func isNonGangSchedulerSet(replicas map[apiv1.ReplicaType]*apiv1.ReplicaSpec) bool {
 	for _, spec := range replicas {
 		if spec.Template.Spec.SchedulerName != "" && spec.Template.Spec.SchedulerName != gangSchedulerName {
 			return true
