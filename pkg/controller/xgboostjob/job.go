@@ -51,7 +51,7 @@ func (r *ReconcileXGBoostJob) DeleteJob(job interface{}) error {
 // GetJobFromInformerCache returns the Job from Informer Cache
 func (r *ReconcileXGBoostJob) GetJobFromInformerCache(namespace, name string) (metav1.Object, error) {
 	job := &v1alpha1.XGBoostJob{}
-	// Default reader for XDLJob is cache reader.
+	// Default reader for XGBoostJob is cache reader.
 	err := r.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, job)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -86,11 +86,10 @@ func (r *ReconcileXGBoostJob) GetJobFromAPIClient(namespace, name string) (metav
 
 // UpdateJobStatus updates the job status and job conditions
 func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.ReplicaType]*v1.ReplicaSpec, jobStatus v1.JobStatus) error {
-	xdlJob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostJob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XDLJob", xdlJob)
+		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
 	//TODO implement this for updating job statue
-	// return r.updateGeneralJobStatus(xdlJob, replicas, jobStatus)
 	return nil
 }

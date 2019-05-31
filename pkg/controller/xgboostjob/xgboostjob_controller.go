@@ -165,7 +165,7 @@ func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, nil
 	}
 	oldStatus := xgbjob.Status.DeepCopy()
-	// Set default priorities for xdl job xdlJob.
+	// Set default priorities for xgboost job
 	scheme.Scheme.Default(xgbjob)
 
 	// Use common to reconcile the job related pod and service
