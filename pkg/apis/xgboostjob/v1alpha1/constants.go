@@ -21,7 +21,7 @@ const (
 	// Kind is the kind name.
 	Kind = "XGBoostJob"
 	// GroupVersion is the version.
-	GroupVersion = "v1"
+	GroupVersion = "v1alpha1"
 	// Plural is the Plural for XGBoostJob.
 	Plural = "xgboostjobs"
 	// Singular is the singular for XGBoostJob.

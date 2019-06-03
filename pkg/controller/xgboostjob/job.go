@@ -90,6 +90,6 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	if !ok {
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
-	//TODO implement this for updating job statue
+	//TODO implement this for updating job status
 	return nil
 }

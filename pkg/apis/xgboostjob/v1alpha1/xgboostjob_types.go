@@ -65,10 +65,10 @@ type XGBoostJobList struct {
 type XGBoostJobReplicaType common.ReplicaType
 
 const (
-	// PyTorchReplicaTypeMaster is the type of Master of distributed PyTorch
+	// XGBoostReplicaTypeMaster is the type of Master of distributed PyTorch
 	XGBoostReplicaTypeMaster XGBoostJobReplicaType = "Master"
 
-	// PyTorchReplicaTypeWorker is the type for workers of distributed PyTorch.
+	// XGBoostReplicaTypeWorker is the type for workers of distributed PyTorch.
 	XGBoostReplicaTypeWorker XGBoostJobReplicaType = "Worker"
 )
 
