@@ -26,7 +26,12 @@ import (
 
 // CreatePod creates the pod
 func (r *ReconcileXGBoostJob) CreatePod(job interface{}, pod *corev1.Pod) error {
-	return r.Create(context.Background(), pod)
+	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	if !ok {
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+	}
+	_, error :=r.xgbJobController.KubeClientSet.CoreV1().Pods(xgbjob.Namespace).Create(pod)
+	return error
 }
 
 // DeletePod deletes the pod
@@ -35,10 +40,7 @@ func (r *ReconcileXGBoostJob) DeletePod(job interface{}, pod *corev1.Pod) error 
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
 	}
-	// Delete pod by pod control.
-	// TODO implement this later
-	// return r.xgbJobController.RealPodControl.DeletePod(pod.Namespace, pod.Name, xgbjob)
-	return nil
+	return r.xgbJobController.KubeClientSet.CoreV1().Pods(xgbjob.Namespace).Delete(pod.Name, nil)
 }
 
 // GetPodsForJob returns the pods managed by the job. This can be achieved by selecting pods using label key "job-name"
