@@ -35,6 +35,9 @@ var (
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 
+	// SchemeGroupVersionKind is the GroupVersionKind of the resource.
+	SchemeGroupVersionKind = SchemeGroupVersion.WithKind(Kind)
+
 	// AddToScheme is required by pkg/client/...
 	AddToScheme = SchemeBuilder.AddToScheme
 )

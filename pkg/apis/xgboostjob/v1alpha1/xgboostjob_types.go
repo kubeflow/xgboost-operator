@@ -61,6 +61,17 @@ type XGBoostJobList struct {
 	Items           []XGBoostJob `json:"items"`
 }
 
+// XGBoostJobReplicaType is the type for XGBoostJobReplica.
+type XGBoostJobReplicaType common.ReplicaType
+
+const (
+	// XGBoostReplicaTypeMaster is the type of Master of distributed PyTorch
+	XGBoostReplicaTypeMaster XGBoostJobReplicaType = "Master"
+
+	// XGBoostReplicaTypeWorker is the type for workers of distributed PyTorch.
+	XGBoostReplicaTypeWorker XGBoostJobReplicaType = "Worker"
+)
+
 func init() {
 	SchemeBuilder.Register(&XGBoostJob{}, &XGBoostJobList{})
 }
