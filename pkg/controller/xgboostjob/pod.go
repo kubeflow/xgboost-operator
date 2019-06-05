@@ -30,7 +30,7 @@ func (r *ReconcileXGBoostJob) CreatePod(job interface{}, pod *corev1.Pod) error 
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
 	}
-	_, error :=r.xgbJobController.KubeClientSet.CoreV1().Pods(xgbjob.Namespace).Create(pod)
+	_, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgbjob.Namespace).Create(pod)
 	return error
 }
 
