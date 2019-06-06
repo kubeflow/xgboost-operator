@@ -26,19 +26,19 @@ import (
 
 // CreateService creates the service
 func (r *ReconcileXGBoostJob) CreateService(job interface{}, service *corev1.Service) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	_, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgbjob.Namespace).Create(service)
+	_, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
 	return err
 }
 
 // DeleteService deletes the service
 func (r *ReconcileXGBoostJob) DeleteService(job interface{}, name string, namespace string) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 	return r.xgbJobController.KubeClientSet.CoreV1().Services(namespace).Delete(name, nil)
 }

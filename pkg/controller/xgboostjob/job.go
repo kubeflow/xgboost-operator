@@ -44,17 +44,17 @@ const (
 
 // DeleteJob deletes the job
 func (r *ReconcileXGBoostJob) DeleteJob(job interface{}) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	if err := r.Delete(context.Background(), xgbjob); err != nil {
-		r.recorder.Eventf(xgbjob, corev1.EventTypeWarning, FailedDeleteJobReason, "Error deleting: %v", err)
-		log.Error(err, "failed to delete job", "namespace", xgbjob.Namespace, "name", xgbjob.Name)
+	if err := r.Delete(context.Background(), xgboostjob); err != nil {
+		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, FailedDeleteJobReason, "Error deleting: %v", err)
+		log.Error(err, "failed to delete job", "namespace", xgboostjob.Namespace, "name", xgboostjob.Name)
 		return err
 	}
-	r.recorder.Eventf(xgbjob, corev1.EventTypeNormal, SuccessfulDeleteJobReason, "Deleted job: %v", xgbjob.Name)
-	log.Info("job deleted", "namespace", xgbjob.Namespace, "name", xgbjob.Name)
+	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, SuccessfulDeleteJobReason, "Deleted job: %v", xgboostjob.Name)
+	log.Info("job deleted", "namespace", xgboostjob.Namespace, "name", xgboostjob.Name)
 	return nil
 }
 

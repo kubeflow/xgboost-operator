@@ -144,8 +144,8 @@ type ReconcileXGBoostJob struct {
 // +kubebuilder:rbac:groups=xgboostjob.kubeflow.org,resources=xgboostjobs/status,verbs=get;update;patch
 func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the XGBoostJob instance
-	xgbjob := &v1alpha1.XGBoostJob{}
-	err := r.Get(context.Background(), request.NamespacedName, xgbjob)
+	xgboostjob := &v1alpha1.XGBoostJob{}
+	err := r.Get(context.Background(), request.NamespacedName, xgboostjob)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -157,41 +157,41 @@ func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	// Check reconcile is required.
-	needSync := r.satisfiedExpectations(xgbjob)
+	needSync := r.satisfiedExpectations(xgboostjob)
 
-	if !needSync || xgbjob.DeletionTimestamp != nil {
+	if !needSync || xgboostjob.DeletionTimestamp != nil {
 		log.Info("reconcile cancelled, job does not need to do reconcile or has been deleted",
-			"sync", needSync, "deleted", xgbjob.DeletionTimestamp != nil)
+			"sync", needSync, "deleted", xgboostjob.DeletionTimestamp != nil)
 		return reconcile.Result{}, nil
 	}
-	oldStatus := xgbjob.Status.DeepCopy()
+	oldStatus := xgboostjob.Status.DeepCopy()
 	// Set default priorities for xgboost job
-	scheme.Scheme.Default(xgbjob)
+	scheme.Scheme.Default(xgboostjob)
 
 	// Use common to reconcile the job related pod and service
-	err = r.xgbJobController.ReconcileJobs(xgbjob, xgbjob.Spec.XGBReplicaSpecs, xgbjob.Status.JobStatus, &xgbjob.Spec.RunPolicy)
+	err = r.xgbJobController.ReconcileJobs(xgboostjob, xgboostjob.Spec.XGBReplicaSpecs, xgboostjob.Status.JobStatus, &xgboostjob.Spec.RunPolicy)
 
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	if !reflect.DeepEqual(oldStatus, &xgbjob.Status.JobStatus) {
-		err = r.UpdateJobStatusInApiServer(xgbjob, &xgbjob.Status.JobStatus)
+	if !reflect.DeepEqual(oldStatus, &xgboostjob.Status.JobStatus) {
+		err = r.UpdateJobStatusInApiServer(xgboostjob, &xgboostjob.Status.JobStatus)
 	}
 	return reconcile.Result{}, err
 }
 
 // UpdateJobStatusInApiServer updates the job status in to cluster.
 func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobStatus *v1.JobStatus) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 	// Job status passed in differs with status in job, update in basis of the passed in one.
-	if !reflect.DeepEqual(&xgbjob.Status.JobStatus, jobStatus) {
-		xgbjob = xgbjob.DeepCopy()
-		xgbjob.Status.JobStatus = *jobStatus.DeepCopy()
+	if !reflect.DeepEqual(&xgboostjob.Status.JobStatus, jobStatus) {
+		xgboostjob = xgboostjob.DeepCopy()
+		xgboostjob.Status.JobStatus = *jobStatus.DeepCopy()
 	}
-	return r.Status().Update(context.Background(), xgbjob)
+	return r.Status().Update(context.Background(), xgboostjob)
 }
 
 func (r *ReconcileXGBoostJob) ControllerName() string {
