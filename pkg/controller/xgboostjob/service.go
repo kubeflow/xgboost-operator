@@ -26,23 +26,21 @@ import (
 
 // CreateService creates the service
 func (r *ReconcileXGBoostJob) CreateService(job interface{}, service *corev1.Service) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	return r.Create(context.Background(), service)
+	_, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
+	return err
 }
 
 // DeleteService deletes the service
 func (r *ReconcileXGBoostJob) DeleteService(job interface{}, name string, namespace string) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	// Delete service by service control.
-	// return r.xgbJobController.ServiceControl.DeleteService(namespace, name, xgbjob)
-	// TODO implement this later
-	return nil
+	return r.xgbJobController.KubeClientSet.CoreV1().Services(namespace).Delete(name, nil)
 }
 
 // GetServicesForJob returns the services managed by the job. This can be achieved by selecting services using label key "job-name"

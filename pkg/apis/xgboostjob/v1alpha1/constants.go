@@ -27,9 +27,9 @@ const (
 	// Singular is the singular for XGBoostJob.
 	Singular = "xgboostjob"
 	// XGBOOSTCRD is the CRD name for XGBoostJob.
-	XGBOOSTCRD = "xgboostjobs.kubeflow.org"
+	XGBoostCRD = "xgboostjobs.kubeflow.org"
 
-	DefaultContainerName     = "xgbjob"
-	DefaultContainerPortName = "xgbjob-port"
+	DefaultContainerName     = "xgboostjob"
+	DefaultContainerPortName = "xgboostjob-port"
 	DefaultPort              = 9999
 )

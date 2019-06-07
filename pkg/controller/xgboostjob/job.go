@@ -19,8 +19,11 @@ import (
 	"context"
 	"fmt"
 	v1 "github.com/kubeflow/common/job_controller/api/v1"
+	commonutil "github.com/kubeflow/common/util"
+	logger "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	k8sv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,21 +33,28 @@ import (
 const (
 	FailedDeleteJobReason     = "FailedDeleteJob"
 	SuccessfulDeleteJobReason = "SuccessfulDeleteJob"
+	// xgboostJobCreatedReason is added in a job when it is created.
+	xgboostJobCreatedReason = "XGBoostJobCreated"
+
+	xgboostJobSucceededReason  = "XGBoostJobSucceeded"
+	xgboostJobRunningReason    = "XGBoostJobRunning"
+	xgboostJobFailedReason     = "XGBoostJobFailed"
+	xgboostJobRestartingReason = "XGBoostJobRestarting"
 )
 
 // DeleteJob deletes the job
 func (r *ReconcileXGBoostJob) DeleteJob(job interface{}) error {
-	xgbjob, ok := job.(*v1alpha1.XGBoostJob)
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgbjob)
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	if err := r.Delete(context.Background(), xgbjob); err != nil {
-		r.recorder.Eventf(xgbjob, corev1.EventTypeWarning, FailedDeleteJobReason, "Error deleting: %v", err)
-		log.Error(err, "failed to delete job", "namespace", xgbjob.Namespace, "name", xgbjob.Name)
+	if err := r.Delete(context.Background(), xgboostjob); err != nil {
+		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, FailedDeleteJobReason, "Error deleting: %v", err)
+		log.Error(err, "failed to delete job", "namespace", xgboostjob.Namespace, "name", xgboostjob.Name)
 		return err
 	}
-	r.recorder.Eventf(xgbjob, corev1.EventTypeNormal, SuccessfulDeleteJobReason, "Deleted job: %v", xgbjob.Name)
-	log.Info("job deleted", "namespace", xgbjob.Namespace, "name", xgbjob.Name)
+	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, SuccessfulDeleteJobReason, "Deleted job: %v", xgboostjob.Name)
+	log.Info("job deleted", "namespace", xgboostjob.Namespace, "name", xgboostjob.Name)
 	return nil
 }
 
@@ -90,6 +100,59 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	if !ok {
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
-	//TODO implement this for updating job status
+
+	for rtype, spec := range replicas {
+		status := jobStatus.ReplicaStatuses[rtype]
+		expected := *(spec.Replicas) - status.Succeeded
+		running := status.Active
+		failed := status.Failed
+
+		if rtype == v1.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster) {
+			if running > 0 {
+				msg := fmt.Sprintf("XGBoostJob %s is running.", xgboostJob.Name)
+				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRunning, xgboostJobRunningReason, msg)
+				if err != nil {
+					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
+					return err
+				}
+			}
+			if expected == 0 {
+				msg := fmt.Sprintf("XGBoostJob %s is successfully completed.", xgboostJob.Name)
+				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeNormal, xgboostJobSucceededReason, msg)
+				if jobStatus.CompletionTime == nil {
+					now := metav1.Now()
+					xgboostJob.Status.CompletionTime = &now
+				}
+				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobSucceeded, xgboostJobSucceededReason, msg)
+				if err != nil {
+					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
+					return err
+				}
+			}
+		}
+		if failed > 0 {
+			if spec.RestartPolicy == v1.RestartPolicyExitCode {
+				msg := fmt.Sprintf("XGBoostJob %s is restarting because %d %s replica(s) failed.", xgboostJob.Name, failed, rtype)
+				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeWarning, xgboostJobRestartingReason, msg)
+				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRestarting, xgboostJobRestartingReason, msg)
+				if err != nil {
+					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
+					return err
+				}
+			} else {
+				msg := fmt.Sprintf("XGBoostJob %s is failed because %d %s replica(s) failed.", xgboostJob.Name, failed, rtype)
+				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeNormal, xgboostJobFailedReason, msg)
+				if xgboostJob.Status.CompletionTime == nil {
+					now := metav1.Now()
+					xgboostJob.Status.CompletionTime = &now
+				}
+				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobFailed, xgboostJobFailedReason, msg)
+				if err != nil {
+					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
