@@ -17,7 +17,12 @@ package xgboostjob
 
 import (
 	"errors"
+	"fmt"
+	common "github.com/kubeflow/common/job_controller/api/v1"
+	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
 	"time"
 )
 
@@ -42,6 +47,44 @@ func getDelegatingReader(c client.Client) (*client.DelegatingReader, error) {
 		return nil, errors.New("cannot convert from DelegatingClient.Reader to Delegating Reader")
 	}
 	return dr, nil
+}
+
+func computeMasterAddr(jobName, rtype, index string) string {
+	n := jobName + "-" + rtype + "-" + index
+	return strings.Replace(n, "/", "-", -1)
+}
+
+// GetPortFromPyTorchJob gets the port of pytorch container.
+func GetPortFromXGBoostJob(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostJobReplicaType) (int32, error) {
+	containers := job.Spec.XGBReplicaSpecs[common.ReplicaType(rtype)].Template.Spec.Containers
+	for _, container := range containers {
+		if container.Name == v1alpha1.DefaultContainerName {
+			ports := container.Ports
+			for _, port := range ports {
+				if port.Name == v1alpha1.DefaultContainerPortName {
+					return port.ContainerPort, nil
+				}
+			}
+		}
+	}
+	return -1, fmt.Errorf("failed to found the port")
+}
+
+func computeTotalReplicas(obj metav1.Object) int32 {
+	job := obj.(*v1alpha1.XGBoostJob)
+	jobReplicas := int32(0)
+
+	if job.Spec.XGBReplicaSpecs == nil || len(job.Spec.XGBReplicaSpecs) == 0 {
+		return jobReplicas
+	}
+	for _, r := range job.Spec.XGBReplicaSpecs {
+		if r.Replicas == nil {
+			continue
+		} else {
+			jobReplicas += *r.Replicas
+		}
+	}
+	return jobReplicas
 }
 
 // FakeWorkQueue implements RateLimitingInterface but actually does nothing.

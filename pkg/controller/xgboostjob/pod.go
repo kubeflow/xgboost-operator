@@ -22,6 +22,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strconv"
+	"strings"
 )
 
 // CreatePod creates the pod
@@ -71,4 +73,56 @@ func convertPodList(list []corev1.Pod) []*corev1.Pod {
 		ret = append(ret, &list[i])
 	}
 	return ret
+}
+
+// Set the pod env set for XGBoost Rabit Tracker and worker
+func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, index string) error {
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
+	if !ok {
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
+	}
+
+	rank, err := strconv.Atoi(index)
+	if err != nil {
+		return err
+	}
+
+	masterAddr := computeMasterAddr(xgboostjob.Name, strings.ToLower(string(v1alpha1.XGBoostReplicaTypeMaster)), strconv.Itoa(0))
+
+	masterPort, err := GetPortFromXGBoostJob(xgboostjob, v1alpha1.XGBoostReplicaTypeMaster)
+	if err != nil {
+		return err
+	}
+
+	totalReplicas := computeTotalReplicas(xgboostjob)
+
+	println(totalReplicas)
+
+	for i := range podTemplate.Spec.Containers {
+		if len(podTemplate.Spec.Containers[i].Env) == 0 {
+			podTemplate.Spec.Containers[i].Env = make([]corev1.EnvVar, 0)
+		}
+		podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+			Name:  "MASTER_PORT",
+			Value: strconv.Itoa(int(masterPort)),
+		})
+		podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+			Name:  "MASTER_ADDR",
+			Value: masterAddr,
+		})
+		podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+			Name:  "WORLD_SIZE",
+			Value: strconv.Itoa(int(totalReplicas)),
+		})
+		podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+			Name:  "RANK",
+			Value: strconv.Itoa(rank),
+		})
+		podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+			Name:  "PYTHONUNBUFFERED",
+			Value: "0",
+		})
+	}
+
+	return nil
 }
