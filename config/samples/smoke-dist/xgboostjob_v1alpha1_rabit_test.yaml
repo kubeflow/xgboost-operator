@@ -1,0 +1,24 @@
+apiVersion: xgboostjob.kubeflow.org/v1alpha1
+kind: XGBoostJob
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: xgboostjob-sample
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: xgboost
+              image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: xgboost
+              image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
