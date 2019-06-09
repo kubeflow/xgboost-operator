@@ -20,6 +20,7 @@ import (
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -229,10 +230,5 @@ func (r *ReconcileXGBoostJob) IsMasterRole(replicas map[v1.ReplicaType]*v1.Repli
 
 // SetClusterSpec sets the cluster spec for the pod
 func (r *ReconcileXGBoostJob) SetClusterSpec(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
-	_, ok := job.(*v1alpha1.XGBoostJob)
-	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", job)
-	}
-	// TODO to implement this for the next pr
-	return nil
+	return SetPodEnv(job, podTemplate, index)
 }
