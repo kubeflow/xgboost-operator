@@ -54,7 +54,7 @@ func computeMasterAddr(jobName, rtype, index string) string {
 	return strings.Replace(n, "/", "-", -1)
 }
 
-// GetPortFromPyTorchJob gets the port of pytorch container.
+// GetPortFromXGBoostJob gets the port of xgboost container.
 func GetPortFromXGBoostJob(job *v1alpha1.XGBoostJob, rtype v1alpha1.XGBoostJobReplicaType) (int32, error) {
 	containers := job.Spec.XGBReplicaSpecs[common.ReplicaType(rtype)].Template.Spec.Containers
 	for _, container := range containers {

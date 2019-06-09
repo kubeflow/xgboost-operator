@@ -96,8 +96,6 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, index strin
 
 	totalReplicas := computeTotalReplicas(xgboostjob)
 
-	println(totalReplicas)
-
 	for i := range podTemplate.Spec.Containers {
 		if len(podTemplate.Spec.Containers[i].Env) == 0 {
 			podTemplate.Spec.Containers[i].Env = make([]corev1.EnvVar, 0)
