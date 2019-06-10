@@ -5,7 +5,7 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: xgboostjob-sample
 spec:
-  pytorchReplicaSpecs:
+  xgboostjobReplicaSpecs:
     Master:
       replicas: 1
       restartPolicy: OnFailure
