@@ -67,7 +67,7 @@ func NewXGBoostReplicaSpecTemplate() v1.PodTemplateSpec {
 			Containers: []v1.Container{
 				v1.Container{
 					Name:  v1alpha1.DefaultContainerName,
-					Image: "test-image-for-kubeflow-pytorch-operator:latest",
+					Image: "test-image-for-kubeflow-xgboost-operator:latest",
 					Args:  []string{"Fake", "Fake"},
 					Ports: []v1.ContainerPort{
 						v1.ContainerPort{
