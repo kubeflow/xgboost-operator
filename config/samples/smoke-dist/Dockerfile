@@ -1,5 +1,5 @@
-# Install python 2.7.
-FROM python:2.7
+# Install python 3。6.
+FROM python:3.6
 
 RUN apt-get update
 RUN apt-get install -y git make g++
@@ -10,6 +10,11 @@ RUN mkdir -p /opt/mlkube
 
 COPY xgboost_smoke_test.py /opt/mlkube/
 COPY tracker.py /opt/mlkube/
+COPY requirements.txt /opt/mlkube/
+
+# Install requirements
+
+RUN pip install -r /opt/mlkube/requirements.txt
 
 # Build XGBoost.
 RUN git clone --recursive https://github.com/dmlc/xgboost && \

@@ -10,8 +10,8 @@ The default image name and tag is `kubeflow/xgboost-dist-rabit-test:1.0`.
 docker build -f Dockerfile -t kubeflow/xgboost-dist-rabit-test:1.0 ./
 ```
 
-**Start the XGBoost rabit tracker **
+**Start and test XGBoost Rabit tracker **
 
 ```
-kubectl create -f ./xgboostjob_v1alpha1_rabit_test.yaml
+kubectl create -f xgboostjob_v1alpha1_rabit_test.yaml
 ```
