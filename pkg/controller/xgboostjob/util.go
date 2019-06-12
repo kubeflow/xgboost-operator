@@ -18,12 +18,17 @@ package xgboostjob
 import (
 	"errors"
 	"fmt"
-	common "github.com/kubeflow/common/job_controller/api/v1"
-	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"os"
 	"strings"
 	"time"
+
+	common "github.com/kubeflow/common/job_controller/api/v1"
+	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	kubebatchclient "github.com/kubernetes-sigs/kube-batch/pkg/client/clientset/versioned"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubeclientset "k8s.io/client-go/kubernetes"
+	restclientset "k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // getClientReaderFromClient try to extract client reader from client, client
@@ -85,6 +90,38 @@ func computeTotalReplicas(obj metav1.Object) int32 {
 		}
 	}
 	return jobReplicas
+}
+
+func createClientSets(config *restclientset.Config) (kubeclientset.Interface, kubeclientset.Interface, kubebatchclient.Interface, error) {
+
+	if config == nil {
+		println("there is an error for the input config")
+		return nil, nil, nil, nil
+	}
+
+	kubeClientSet, err := kubeclientset.NewForConfig(restclientset.AddUserAgent(config, "xgboostjob-operator"))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	leaderElectionClientSet, err := kubeclientset.NewForConfig(restclientset.AddUserAgent(config, "leader-election"))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	kubeBatchClientSet, err := kubebatchclient.NewForConfig(restclientset.AddUserAgent(config, "kube-batch"))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return kubeClientSet, leaderElectionClientSet, kubeBatchClientSet, nil
+}
+
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	return os.Getenv("USERPROFILE") // windows
 }
 
 // FakeWorkQueue implements RateLimitingInterface but actually does nothing.

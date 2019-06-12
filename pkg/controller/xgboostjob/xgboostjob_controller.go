@@ -14,7 +14,11 @@ package xgboostjob
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"path/filepath"
+	"reflect"
+
 	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
@@ -25,9 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	k8scontroller "k8s.io/kubernetes/pkg/controller"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -56,6 +60,8 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
+const RecommendedKubeConfigPathEnv = "KUBECONFIG"
+
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
@@ -66,13 +72,35 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	r.recorder = mgr.GetRecorder(r.ControllerName())
 
+	var kubeconfig *string
+
+	if home := homeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig_tmp", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig_tmp", "", "absolute path to the kubeconfig file")
+	}
+
+	/// TODO, add the master url and kubeconfigpath with user input
+	kcfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		log.Info("Error building kubeconfig: %s", err.Error())
+	}
+
+	// Create clients.
+	kubeClientSet, _, kubeBatchClientSet, err := createClientSets(kcfg)
+	if err != nil {
+		log.Info("Error building kubeclientset: %s", err.Error())
+	}
+
 	// Initialize common job controller with components we only need.
 	r.xgbJobController = job_controller.JobController{
-		Controller:   r,
-		Expectations: k8scontroller.NewControllerExpectations(),
-		Config:       v1.JobControllerConfiguration{EnableGangScheduling: true},
-		WorkQueue:    &FakeWorkQueue{},
-		Recorder:     r.recorder,
+		Controller:         r,
+		Expectations:       k8scontroller.NewControllerExpectations(),
+		Config:             v1.JobControllerConfiguration{EnableGangScheduling: true},
+		WorkQueue:          &FakeWorkQueue{},
+		Recorder:           r.recorder,
+		KubeClientSet:      kubeClientSet,
+		KubeBatchClientSet: kubeBatchClientSet,
 	}
 
 	return r

@@ -15,9 +15,9 @@ spec:
           containers:
             - name: xgboostjob
               image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
-          ports:
-            - containerPort: 9999
-              name: xgboostjob-port
+              ports:
+              - containerPort: 9991
+                name: xgboostjob-port
     Worker:
       replicas: 3
       restartPolicy: OnFailure
@@ -26,3 +26,6 @@ spec:
           containers:
             - name: xgboostjob
               image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
+              ports:
+              - containerPort: 9991
+                name: xgboostjob-port
