@@ -243,8 +243,12 @@ func (r *ReconcileXGBoostJob) GetDefaultContainerName() string {
 	return v1alpha1.DefaultContainerName
 }
 
-func (r *ReconcileXGBoostJob) GetDefaultContainerPortNumber() string {
-	return string(v1alpha1.DefaultPort)
+func (r *ReconcileXGBoostJob) GetDefaultContainerPortNumber() int32 {
+	return v1alpha1.DefaultPort
+}
+
+func (r *ReconcileXGBoostJob) GetDefaultContainerPortName() string {
+	return v1alpha1.DefaultContainerPortName
 }
 
 func (r *ReconcileXGBoostJob) GetJobRoleKey() string {

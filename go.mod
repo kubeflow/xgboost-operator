@@ -11,7 +11,7 @@ require (
 	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
-	github.com/kubeflow/common v0.0.0-20190523233018-ae5ac6fc7ef9
+	github.com/kubeflow/common v0.0.0-20190612032929-2648a6845fbd
 	github.com/kubernetes-sigs/kube-batch v0.4.2
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
