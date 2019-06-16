@@ -41,7 +41,6 @@ func (r *ReconcileXGBoostJob) satisfiedExpectations(xgbJob *v1alpha1.XGBoostJob)
 		satisfied = satisfied || r.xgbJobController.Expectations.SatisfiedExpectations(expectationPodsKey)
 		// Check the expectations of the services.
 		expectationServicesKey := job_controller.GenExpectationServicesKey(key, string(rtype))
-		println(expectationServicesKey)
 		satisfied = satisfied || r.xgbJobController.Expectations.SatisfiedExpectations(expectationServicesKey)
 	}
 	return satisfied

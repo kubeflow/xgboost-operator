@@ -104,9 +104,6 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
 
-		println(status.Active)
-		println(status.Succeeded)
-
 		expected := *(spec.Replicas) - status.Succeeded
 		running := status.Active
 		failed := status.Failed
