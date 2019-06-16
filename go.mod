@@ -24,6 +24,7 @@ require (
 	github.com/prometheus/common v0.4.1 // indirect
 	github.com/prometheus/procfs v0.0.0-20190529155944-65bdadfa96ae // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/cobra v0.0.4 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect

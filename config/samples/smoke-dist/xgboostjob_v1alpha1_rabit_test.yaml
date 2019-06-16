@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: gcr.io/kubeflow-ci/pytorch-dist-sendrecv-test:1.0
+            image: docker.io/merlintang/xgboost-dist-rabit-test:1.1
             ports:
             - containerPort: 9991
               name: xgboostjob-port
@@ -25,7 +25,7 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: gcr.io/kubeflow-ci/pytorch-dist-sendrecv-test:1.0
+            image: docker.io/merlintang/xgboost-dist-rabit-test:1.1
             ports:
             - containerPort: 9991
               name: xgboostjob-port

@@ -16,7 +16,6 @@ import (
 	"context"
 	"flag"
 	"path/filepath"
-	"reflect"
 
 	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/common/job_controller/api/v1"
@@ -24,6 +23,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -202,15 +202,15 @@ func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Re
 			"sync", needSync, "deleted", xgboostjob.DeletionTimestamp != nil)
 		return reconcile.Result{}, nil
 	}
-	oldStatus := xgboostjob.Status.DeepCopy()
 	// Set default priorities for xgboost job
 	scheme.Scheme.Default(xgboostjob)
 
 	// Use common to reconcile the job related pod and service
 	err = r.xgbJobController.ReconcileJobs(xgboostjob, xgboostjob.Spec.XGBReplicaSpecs, xgboostjob.Status.JobStatus, &xgboostjob.Spec.RunPolicy)
 
-	if !reflect.DeepEqual(oldStatus, &xgboostjob.Status.JobStatus) {
-		err = r.UpdateJobStatusInApiServer(xgboostjob, &xgboostjob.Status.JobStatus)
+	if err != nil {
+		logrus.Warnf("Reconcile XGBoost Job error %v", err)
+		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, err
