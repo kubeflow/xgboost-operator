@@ -124,6 +124,15 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
+func isGangSchedulerSet(replicas map[common.ReplicaType]*common.ReplicaSpec) bool {
+	for _, spec := range replicas {
+		if spec.Template.Spec.SchedulerName != "" && spec.Template.Spec.SchedulerName == gangSchedulerName {
+			return true
+		}
+	}
+	return false
+}
+
 // FakeWorkQueue implements RateLimitingInterface but actually does nothing.
 type FakeWorkQueue struct{}
 

@@ -1,31 +1,32 @@
-apiVersion: xgboostjob.kubeflow.org/v1alpha1
-kind: XGBoostJob
+apiVersion: "xgboostjob.kubeflow.org/v1alpha1"
+kind: "XGBoostJob"
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: xgboostjob-sample
+  name: "xgboost-dist-test"
 spec:
-  masterPort: "234567"
   xgbReplicaSpecs:
     Master:
       replicas: 1
-      restartPolicy: OnFailure
       template:
+        apiVersion: v1
+        kind: Pod
         spec:
           containers:
-            - name: xgboostjob
-              image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
-              ports:
-              - containerPort: 9991
-                name: xgboostjob-port
+          - name: xgboostjob
+            image: gcr.io/kubeflow-ci/pytorch-dist-sendrecv-test:1.0
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            imagePullPolicy: Always
     Worker:
-      replicas: 3
-      restartPolicy: OnFailure
+      replicas: 1
       template:
+        apiVersion: v1
+        kind: Pod
         spec:
           containers:
-            - name: xgboostjob
-              image: gcr.io/kubeflow-ci/xgboost-dist-rabit-test:1.0
-              ports:
-              - containerPort: 9991
-                name: xgboostjob-port
+          - name: xgboostjob
+            image: gcr.io/kubeflow-ci/pytorch-dist-sendrecv-test:1.0
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            imagePullPolicy: Always

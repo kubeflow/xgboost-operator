@@ -31,6 +31,7 @@ func (r *ReconcileXGBoostJob) CreateService(job interface{}, service *corev1.Ser
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 	_, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
+
 	return err
 }
 

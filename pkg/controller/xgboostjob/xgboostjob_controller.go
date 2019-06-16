@@ -15,7 +15,6 @@ package xgboostjob
 import (
 	"context"
 	"flag"
-	"fmt"
 	"path/filepath"
 	"reflect"
 
@@ -45,6 +44,8 @@ import (
 const (
 	controllerName      = "xgboostjob-operator"
 	labelXGBoostJobRole = "xgboostjob-job-role"
+	// gang scheduler name.
+	gangSchedulerName = "kube-batch"
 )
 
 var log = logf.Log.WithName("controller")
@@ -75,15 +76,17 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	var kubeconfig *string
 
 	if home := homeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig_tmp", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		kubeconfig = flag.String("kubeconfig_", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
-		kubeconfig = flag.String("kubeconfig_tmp", "", "absolute path to the kubeconfig file")
+		kubeconfig = flag.String("kubeconfig_", "", "absolute path to the kubeconfig file")
 	}
+	flag.Parse()
 
 	/// TODO, add the master url and kubeconfigpath with user input
 	kcfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		log.Info("Error building kubeconfig: %s", err.Error())
+		panic(err.Error())
 	}
 
 	// Create clients.
@@ -92,11 +95,17 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		log.Info("Error building kubeclientset: %s", err.Error())
 	}
 
+	xgboostjob := &v1alpha1.XGBoostJob{}
+
+	gangScheduling := isGangSchedulerSet(xgboostjob.Spec.XGBReplicaSpecs)
+
+	log.Info("gang scheduling is set: ", "gangscheduling", gangScheduling)
+
 	// Initialize common job controller with components we only need.
 	r.xgbJobController = job_controller.JobController{
 		Controller:         r,
 		Expectations:       k8scontroller.NewControllerExpectations(),
-		Config:             v1.JobControllerConfiguration{EnableGangScheduling: true},
+		Config:             v1.JobControllerConfiguration{EnableGangScheduling: gangScheduling},
 		WorkQueue:          &FakeWorkQueue{},
 		Recorder:           r.recorder,
 		KubeClientSet:      kubeClientSet,
@@ -200,27 +209,11 @@ func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Re
 	// Use common to reconcile the job related pod and service
 	err = r.xgbJobController.ReconcileJobs(xgboostjob, xgboostjob.Spec.XGBReplicaSpecs, xgboostjob.Status.JobStatus, &xgboostjob.Spec.RunPolicy)
 
-	if err != nil {
-		return reconcile.Result{}, err
-	}
 	if !reflect.DeepEqual(oldStatus, &xgboostjob.Status.JobStatus) {
 		err = r.UpdateJobStatusInApiServer(xgboostjob, &xgboostjob.Status.JobStatus)
 	}
-	return reconcile.Result{}, err
-}
 
-// UpdateJobStatusInApiServer updates the job status in to cluster.
-func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobStatus *v1.JobStatus) error {
-	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
-	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
-	}
-	// Job status passed in differs with status in job, update in basis of the passed in one.
-	if !reflect.DeepEqual(&xgboostjob.Status.JobStatus, jobStatus) {
-		xgboostjob = xgboostjob.DeepCopy()
-		xgboostjob.Status.JobStatus = *jobStatus.DeepCopy()
-	}
-	return r.Status().Update(context.Background(), xgboostjob)
+	return reconcile.Result{}, err
 }
 
 func (r *ReconcileXGBoostJob) ControllerName() string {
