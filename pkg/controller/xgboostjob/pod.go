@@ -18,12 +18,15 @@ package xgboostjob
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strconv"
-	"strings"
 )
 
 // CreatePod creates the pod
@@ -33,11 +36,14 @@ func (r *ReconcileXGBoostJob) CreatePod(job interface{}, pod *corev1.Pod) error 
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 
-	resp, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Create(pod)
+	logrus.Info("Creating pod ", " Controller name : ", xgboostjob.GetName(), " Pod name: ", pod.Namespace+"/"+pod.Name)
+
+	//resp, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Create(pod)
+	error := r.Create(context.Background(), pod)
 
 	if error != nil {
-		log.Info("Error building a pod: %s", error.Error())
-		return fmt.Errorf("error to create a pod at phase %s", resp.Status.Phase)
+		log.Info("Error building a pod via XGBoost operator: %s", error.Error())
+		return error
 	}
 
 	return error
@@ -49,7 +55,17 @@ func (r *ReconcileXGBoostJob) DeletePod(job interface{}, pod *corev1.Pod) error 
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	return r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Delete(pod.Name, nil)
+
+	logrus.Info("Deleting pod", "controller name", xgboostjob.GetName(), "pod name", pod.Namespace+"/"+pod.Name)
+
+	if err := r.Delete(context.Background(), pod); err != nil {
+		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, job_controller.FailedDeletePodReason, "Error deleting: %v", err)
+		return err
+	}
+	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeletePodReason, "Deleted pod: %v", pod.Name)
+	return nil
+
+	// return r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Delete(pod.Name, nil)
 }
 
 // GetPodsForJob returns the pods managed by the job. This can be achieved by selecting pods using label key "job-name"
