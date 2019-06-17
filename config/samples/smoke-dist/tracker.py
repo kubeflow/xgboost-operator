@@ -5,7 +5,6 @@ Implements the tracker control protocol
  - start ps scheduler and rabit tracker
  - help nodes to establish links with each other
 Tianqi Chen
-Notes from Matthew Rocklin
 --------------------------
 This was taken from
 https://github.com/dmlc/dmlc-core/blob/master/tracker/dmlc_tracker/tracker.py

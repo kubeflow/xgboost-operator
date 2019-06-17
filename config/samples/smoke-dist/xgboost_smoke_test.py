@@ -23,10 +23,10 @@ from tracker import RabitTracker
 logger = logging.getLogger(__name__)
 
 def extract_xgbooost_cluster_env():
-    master_addr=os.environ['MASTER_ADDR']
-    master_port=int(os.environ['MASTER_PORT'])
-    rank=int(os.environ['RANK'])
-    world_size=int(os.environ['WORLD_SIZE'])
+    master_addr = os.environ.get['MASTER_ADDR']
+    master_port = int(os.environ.get['MASTER_PORT'])
+    rank = int(os.environ.get['RANK'])
+    world_size = int(os.environ.get['WORLD_SIZE'])
 
     return master_addr, master_port, rank, world_size
 
@@ -44,7 +44,7 @@ def setup_rabit_cluster():
                                      port=port, port_end=port + 1)
                 rabit.start(world_size)
                 rabit_tracker = rabit
-                logger.info('########### RabitTracker Setup Finished#########')
+                logger.info('########### RabitTracker Setup Finished #########')
 
             envs = [
                 'DMLC_NUM_WORKER=%d' % world_size,
@@ -52,22 +52,23 @@ def setup_rabit_cluster():
                 'DMLC_TRACKER_PORT=%d' % port,
                 'DMLC_TASK_ID=%d' % rank
             ]
-            logger.info('##### rabit rank Setup with below envs #####')
+            logger.info('##### Rabit rank setup with below envs #####')
             for i, env in enumerate(envs):
                 logger.info(env)
                 envs[i] = str.encode(env)
 
             xgb.rabit.init(envs)
-            logger.info('##### rabit rank = %d' % xgb.rabit.get_rank())
+            logger.info('##### Rabit rank = %d' % xgb.rabit.get_rank())
 
             rank = xgb.rabit.get_rank()
             s = None
             if rank == 0:
                 s = {'hello world': 100, 2: 3}
-            print('@node[%d] before-broadcast: s=\"%s\"' % (rank, str(s)))
+
+            logger.info('@node[%d] before-broadcast: s=\"%s\"' % (rank, str(s)))
             s = xgb.rabit.broadcast(s, 0)
 
-            print('@node[%d] after-broadcast: s=\"%s\"' % (rank, str(s)))
+            logger.info('@node[%d] after-broadcast: s=\"%s\"' % (rank, str(s)))
 
     except Exception as e:
         logger.error("something wrong happen: %s", traceback.format_exc())

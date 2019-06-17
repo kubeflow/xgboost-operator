@@ -4,10 +4,10 @@ This folder containers Dockerfile and distributed send/recv test.
 
 **Build Image**
 
-The default image name and tag is `kubeflow/xgboost-dist-rabit-test:1.0`.
+The default image name and tag is `kubeflow/xgboost-dist-rabit-test:1.1`.
 
 ```shell
-docker build -f Dockerfile -t kubeflow/xgboost-dist-rabit-test:1.0 ./
+docker build -f Dockerfile -t kubeflow/xgboost-dist-rabit-test:1.1 ./
 ```
 
 **Start and test XGBoost Rabit tracker **

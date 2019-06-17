@@ -2,4 +2,3 @@ numpy>=1.16.3
 Cython>=0.29.4
 requests>=2.21.0
 urllib3>=1.21.1
-pandas>=0.23.2
