@@ -101,6 +101,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	if !ok {
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
+
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
 
@@ -122,7 +123,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeNormal, xgboostJobSucceededReason, msg)
 				if jobStatus.CompletionTime == nil {
 					now := metav1.Now()
-					xgboostJob.Status.CompletionTime = &now
+					jobStatus.CompletionTime = &now
 				}
 				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobSucceeded, xgboostJobSucceededReason, msg)
 				if err != nil {
@@ -154,6 +155,15 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 				}
 			}
 		}
+	}
+
+	// Some workers are still running, leave a running condition.
+	msg := fmt.Sprintf("XGBoostJob %s is running.", xgboostJob.Name)
+	logger.LoggerForJob(xgboostJob).Infof(msg)
+
+	if err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRunning, xgboostJobSucceededReason, msg); err != nil {
+		log.Error(err, "failed to update xgboost job job conditions")
+		return err
 	}
 
 	return nil
