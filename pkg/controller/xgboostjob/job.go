@@ -97,7 +97,7 @@ func (r *ReconcileXGBoostJob) GetJobFromAPIClient(namespace, name string) (metav
 }
 
 // UpdateJobStatus updates the job status and job conditions
-func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.ReplicaType]*v1.ReplicaSpec, jobStatus v1.JobStatus) error {
+func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.ReplicaType]*v1.ReplicaSpec, jobStatus *v1.JobStatus) error {
 	xgboostJob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
@@ -118,7 +118,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 		if rtype == v1.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster) {
 			if running > 0 {
 				msg := fmt.Sprintf("XGBoostJob %s is running.", xgboostJob.Name)
-				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRunning, xgboostJobRunningReason, msg)
+				err := commonutil.UpdateJobConditions(jobStatus, v1.JobRunning, xgboostJobRunningReason, msg)
 				if err != nil {
 					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
 					return err
@@ -131,7 +131,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 					now := metav1.Now()
 					jobStatus.CompletionTime = &now
 				}
-				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobSucceeded, xgboostJobSucceededReason, msg)
+				err := commonutil.UpdateJobConditions(jobStatus, v1.JobSucceeded, xgboostJobSucceededReason, msg)
 				if err != nil {
 					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
 					return err
@@ -142,7 +142,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 			if spec.RestartPolicy == v1.RestartPolicyExitCode {
 				msg := fmt.Sprintf("XGBoostJob %s is restarting because %d %s replica(s) failed.", xgboostJob.Name, failed, rtype)
 				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeWarning, xgboostJobRestartingReason, msg)
-				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRestarting, xgboostJobRestartingReason, msg)
+				err := commonutil.UpdateJobConditions(jobStatus, v1.JobRestarting, xgboostJobRestartingReason, msg)
 				if err != nil {
 					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
 					return err
@@ -154,7 +154,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 					now := metav1.Now()
 					xgboostJob.Status.CompletionTime = &now
 				}
-				err := commonutil.UpdateJobConditions(&jobStatus, v1.JobFailed, xgboostJobFailedReason, msg)
+				err := commonutil.UpdateJobConditions(jobStatus, v1.JobFailed, xgboostJobFailedReason, msg)
 				if err != nil {
 					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
 					return err
@@ -167,8 +167,8 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	msg := fmt.Sprintf("XGBoostJob %s is running.", xgboostJob.Name)
 	logger.LoggerForJob(xgboostJob).Infof(msg)
 
-	if err := commonutil.UpdateJobConditions(&jobStatus, v1.JobRunning, xgboostJobSucceededReason, msg); err != nil {
-		log.Error(err, "failed to update xgboost job job conditions")
+	if err := commonutil.UpdateJobConditions(jobStatus, v1.JobRunning, xgboostJobSucceededReason, msg); err != nil {
+		log.Error(err, "failed to update XGBoost Job conditions")
 		return err
 	}
 
