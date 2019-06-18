@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"reflect"
 )
 
 // Reasons for job events.
@@ -100,9 +101,9 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	if !ok {
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
-
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
+
 		expected := *(spec.Replicas) - status.Succeeded
 		running := status.Active
 		failed := status.Failed
@@ -154,5 +155,24 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 			}
 		}
 	}
+
 	return nil
+}
+
+// UpdateJobStatusInApiServer updates the job status in to cluster.
+func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobStatus *v1.JobStatus) error {
+	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
+	if !ok {
+		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
+	}
+
+	// Job status passed in differs with status in job, update in basis of the passed in one.
+	if !reflect.DeepEqual(&xgboostjob.Status.JobStatus, jobStatus) {
+		xgboostjob = xgboostjob.DeepCopy()
+		xgboostjob.Status.JobStatus = *jobStatus.DeepCopy()
+	}
+
+	result := r.Status().Update(context.Background(), xgboostjob)
+
+	return result
 }
