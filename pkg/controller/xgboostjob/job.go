@@ -20,6 +20,7 @@ import (
 	"fmt"
 	v1 "github.com/kubeflow/common/job_controller/api/v1"
 	commonutil "github.com/kubeflow/common/util"
+	"k8s.io/client-go/kubernetes/scheme"
 	logger "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -29,6 +30,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"reflect"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // Reasons for job events.
@@ -197,3 +200,21 @@ func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobSta
 
 	return nil
 }
+
+// onOwnerCreateFunc modify creation condition.
+func onOwnerCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool {
+	return func(e event.CreateEvent) bool {
+		xgboostJob, ok := e.Meta.(*v1alpha1.XGBoostJob)
+		if !ok {
+			return true
+		}
+		scheme.Scheme.Default(xgboostJob)
+		msg := fmt.Sprintf("xgboostJob %s is created.", e.Meta.GetName())
+		if err := commonutil.UpdateJobConditions(&xgboostJob.Status.JobStatus, v1.JobCreated, xgboostJobCreatedReason, msg); err != nil {
+			log.Error(err, "append job condition error")
+			return false
+		}
+		return true
+	}
+}
+

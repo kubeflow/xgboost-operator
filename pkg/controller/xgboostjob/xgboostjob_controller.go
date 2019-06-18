@@ -124,7 +124,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to XGBoostJob
-	err = c.Watch(&source.Kind{Type: &v1alpha1.XGBoostJob{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &v1alpha1.XGBoostJob{}}, &handler.EnqueueRequestForObject{},
+		predicate.Funcs{CreateFunc: onOwnerCreateFunc(r)},
+		)
 	if err != nil {
 		return err
 	}
