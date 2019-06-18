@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,7 +31,12 @@ func (r *ReconcileXGBoostJob) CreateService(job interface{}, service *corev1.Ser
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	_, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
+	service, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
+
+	if err != nil {
+		logrus.Warnf("create service error %v", err)
+	}
+
 	return err
 }
 

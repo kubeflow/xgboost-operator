@@ -11,7 +11,8 @@ require (
 	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
-	github.com/kubeflow/common v0.0.0-20190523233018-ae5ac6fc7ef9
+	github.com/kubeflow/common v0.0.0-20190612032929-2648a6845fbd
+	github.com/kubernetes-sigs/kube-batch v0.4.2
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/prometheus/common v0.4.1 // indirect
 	github.com/prometheus/procfs v0.0.0-20190529155944-65bdadfa96ae // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/cobra v0.0.4 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
@@ -35,7 +37,7 @@ require (
 	golang.org/x/tools v0.0.0-20190529203303-fb6c8ffd2207 // indirect
 	google.golang.org/appengine v1.6.0 // indirect
 	k8s.io/api v0.0.0-20181026184759-d1dc89ebaebe
-	k8s.io/apiextensions-apiserver v0.0.0-20181026191334-ba848ee89ca3 // indirect
+	k8s.io/apiextensions-apiserver v0.0.0-20181026191334-ba848ee89ca3
 	k8s.io/apimachinery v0.0.0-20181022183627-f71dbbc36e12
 	k8s.io/apiserver v0.0.0-20181026185746-f1e867e1a455 // indirect
 	k8s.io/client-go v0.0.0-20181004124242-1638f8970cef

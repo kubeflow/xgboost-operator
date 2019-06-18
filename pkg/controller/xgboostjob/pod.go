@@ -32,7 +32,14 @@ func (r *ReconcileXGBoostJob) CreatePod(job interface{}, pod *corev1.Pod) error 
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
-	_, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Create(pod)
+
+	resp, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Create(pod)
+
+	if error != nil {
+		log.Info("Error building a pod: %s", error.Error())
+		return fmt.Errorf("error to create a pod at phase %s", resp.Status.Phase)
+	}
+
 	return error
 }
 

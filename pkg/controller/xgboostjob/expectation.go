@@ -16,9 +16,11 @@ limitations under the License.
 package xgboostjob
 
 import (
+	"fmt"
 	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -30,13 +32,13 @@ func (r *ReconcileXGBoostJob) satisfiedExpectations(xgbJob *v1alpha1.XGBoostJob)
 	satisfied := false
 	key, err := job_controller.KeyFunc(xgbJob)
 	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for job object %#v: %v", xgbJob, err))
 		return false
 	}
 	for rtype := range xgbJob.Spec.XGBReplicaSpecs {
 		// Check the expectations of the pods.
 		expectationPodsKey := job_controller.GenExpectationPodsKey(key, string(rtype))
 		satisfied = satisfied || r.xgbJobController.Expectations.SatisfiedExpectations(expectationPodsKey)
-
 		// Check the expectations of the services.
 		expectationServicesKey := job_controller.GenExpectationServicesKey(key, string(rtype))
 		satisfied = satisfied || r.xgbJobController.Expectations.SatisfiedExpectations(expectationServicesKey)
