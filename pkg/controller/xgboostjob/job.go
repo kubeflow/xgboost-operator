@@ -22,6 +22,7 @@ import (
 	commonutil "github.com/kubeflow/common/util"
 	logger "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	k8sv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -102,12 +103,17 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
 
+	logrus.Info("job status and time", jobStatus.StartTime)
+
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
 
 		expected := *(spec.Replicas) - status.Succeeded
 		running := status.Active
 		failed := status.Failed
+
+		logrus.Infof("XGboostJob=%s, ReplicaType=%s expected=%d, running=%d, failed=%d",
+			xgboostJob.Name, rtype, expected, running, failed)
 
 		if rtype == v1.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster) {
 			if running > 0 {
@@ -176,13 +182,17 @@ func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobSta
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 
+	logrus.Info("update job in the api service result and job with condition: ", jobStatus.Conditions)
+
 	// Job status passed in differs with status in job, update in basis of the passed in one.
 	if !reflect.DeepEqual(&xgboostjob.Status.JobStatus, jobStatus) {
 		xgboostjob = xgboostjob.DeepCopy()
 		xgboostjob.Status.JobStatus = *jobStatus.DeepCopy()
 	}
 
-	result := r.Status().Update(context.Background(), xgboostjob)
+	result := r.Update(context.Background(), xgboostjob)
+
+	logrus.Info("update job in the api service result, and the update result:   ", result)
 
 	return result
 }

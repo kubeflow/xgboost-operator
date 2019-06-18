@@ -82,8 +82,11 @@ func (r *ReconcileXGBoostJob) GetServicesForJob(obj interface{}) ([]*corev1.Serv
 	if err != nil {
 		return nil, err
 	}
+
 	//TODO support adopting/orphaning
-	return convertServiceList(serviceList.Items), nil
+	ret := convertServiceList(serviceList.Items)
+
+	return ret, nil
 }
 
 // convertServiceList convert service list to service point list
