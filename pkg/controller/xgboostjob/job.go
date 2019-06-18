@@ -168,7 +168,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	logger.LoggerForJob(xgboostJob).Infof(msg)
 
 	if err := commonutil.UpdateJobConditions(jobStatus, v1.JobRunning, xgboostJobSucceededReason, msg); err != nil {
-		log.Error(err, "failed to update XGBoost Job conditions")
+		logger.LoggerForJob(xgboostJob).Error(err, "failed to update XGBoost Job conditions")
 		return err
 	}
 
@@ -182,8 +182,6 @@ func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobSta
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 
-	logrus.Info("update job in the api service result and job with condition: ", jobStatus.Conditions)
-
 	// Job status passed in differs with status in job, update in basis of the passed in one.
 	if !reflect.DeepEqual(&xgboostjob.Status.JobStatus, jobStatus) {
 		xgboostjob = xgboostjob.DeepCopy()
@@ -192,7 +190,10 @@ func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobSta
 
 	result := r.Update(context.Background(), xgboostjob)
 
-	logrus.Info("update job in the api service result, and the update result:   ", result)
+	if result != nil{
+		logger.LoggerForJob(xgboostjob).Error(result, "failed to update XGBoost Job conditions in the API server")
+		return result
+	}
 
-	return result
+	return nil
 }
