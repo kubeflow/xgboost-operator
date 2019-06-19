@@ -211,6 +211,7 @@ func onOwnerCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool {
 		}
 		scheme.Scheme.Default(xgboostJob)
 		msg := fmt.Sprintf("xgboostJob %s is created.", e.Meta.GetName())
+		logrus.Info(msg)
 		if err := commonutil.UpdateJobConditions(&xgboostJob.Status.JobStatus, v1.JobCreated, xgboostJobCreatedReason, msg); err != nil {
 			log.Error(err, "append job condition error")
 			return false
