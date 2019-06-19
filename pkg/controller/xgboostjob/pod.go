@@ -38,7 +38,6 @@ func (r *ReconcileXGBoostJob) CreatePod(job interface{}, pod *corev1.Pod) error 
 
 	logrus.Info("Creating pod ", " Controller name : ", xgboostjob.GetName(), " Pod name: ", pod.Namespace+"/"+pod.Name)
 
-	//resp, error := r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Create(pod)
 	error := r.Create(context.Background(), pod)
 
 	if error != nil {
@@ -63,9 +62,8 @@ func (r *ReconcileXGBoostJob) DeletePod(job interface{}, pod *corev1.Pod) error 
 		return err
 	}
 	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeletePodReason, "Deleted pod: %v", pod.Name)
-	return nil
 
-	// return r.xgbJobController.KubeClientSet.CoreV1().Pods(xgboostjob.Namespace).Delete(pod.Name, nil)
+	return nil
 }
 
 // GetPodsForJob returns the pods managed by the job. This can be achieved by selecting pods using label key "job-name"

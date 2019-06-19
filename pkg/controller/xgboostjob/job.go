@@ -107,8 +107,6 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 		return fmt.Errorf("%+v is not a type of xgboostJob", xgboostJob)
 	}
 
-	logrus.Info("job status and time", jobStatus.StartTime)
-
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
 
