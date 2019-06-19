@@ -22,7 +22,6 @@ import (
 
 	v1 "github.com/kubeflow/common/job_controller/api/v1"
 	commonutil "github.com/kubeflow/common/util"
-	"k8s.io/client-go/kubernetes/scheme"
 	logger "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -31,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -194,7 +194,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatusInApiServer(job interface{}, jobSta
 
 	result := r.Update(context.Background(), xgboostjob)
 
-	if result != nil{
+	if result != nil {
 		logger.LoggerForJob(xgboostjob).Error(result, "failed to update XGBoost Job conditions in the API server")
 		return result
 	}
@@ -218,4 +218,3 @@ func onOwnerCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool {
 		return true
 	}
 }
-
