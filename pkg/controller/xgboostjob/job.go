@@ -110,12 +110,13 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	for rtype, spec := range replicas {
 		status := jobStatus.ReplicaStatuses[rtype]
 
-		expected := *(spec.Replicas) - status.Succeeded
+		succeeded := status.Succeeded
+		expected := *(spec.Replicas) - succeeded
 		running := status.Active
 		failed := status.Failed
 
-		logrus.Infof("XGboostJob=%s, ReplicaType=%s expected=%d, running=%d, failed=%d",
-			xgboostJob.Name, rtype, expected, running, failed)
+		logrus.Infof("XGboostJob=%s, ReplicaType=%s expected=%d, running=%d, succeeded=%d , failed=%d",
+			xgboostJob.Name, rtype, expected, running, succeeded, failed)
 
 		if rtype == v1.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster) {
 			if running > 0 {
@@ -169,7 +170,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 	msg := fmt.Sprintf("XGBoostJob %s is running.", xgboostJob.Name)
 	logger.LoggerForJob(xgboostJob).Infof(msg)
 
-	if err := commonutil.UpdateJobConditions(jobStatus, v1.JobRunning, xgboostJobSucceededReason, msg); err != nil {
+	if err := commonutil.UpdateJobConditions(jobStatus, v1.JobRunning, xgboostJobRunningReason, msg); err != nil {
 		logger.LoggerForJob(xgboostJob).Error(err, "failed to update XGBoost Job conditions")
 		return err
 	}

@@ -3,30 +3,34 @@ kind: "XGBoostJob"
 metadata:
   name: "xgboost-dist-test"
 spec:
+  backoffLimit: 1
   xgbReplicaSpecs:
     Master:
       replicas: 1
+      restartPolicy: Never
       template:
         apiVersion: v1
         kind: Pod
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-rabit-test:1.1
+            image: docker.io/merlintang/xgboost-dist-rabit-test:1.2
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
     Worker:
-      replicas: 1
+      replicas: 2
+      restartPolicy: Never
       template:
         apiVersion: v1
         kind: Pod
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-rabit-test:1.1
+            image: docker.io/merlintang/xgboost-dist-rabit-test:1.2
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
+

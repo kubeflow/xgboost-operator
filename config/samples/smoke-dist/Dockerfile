@@ -8,7 +8,6 @@ RUN mkdir -p /opt/mlkube
 
 # Download the rabit tracker and xgboost code.
 
-COPY xgboost_smoke_test.py /opt/mlkube/
 COPY tracker.py /opt/mlkube/
 COPY requirements.txt /opt/mlkube/
 
@@ -21,5 +20,7 @@ RUN git clone --recursive https://github.com/dmlc/xgboost && \
     cd xgboost && \
     make -j4 && \
     cd python-package; python setup.py install
+
+COPY xgboost_smoke_test.py /opt/mlkube/
 
 ENTRYPOINT ["python", "/opt/mlkube/xgboost_smoke_test.py"]
