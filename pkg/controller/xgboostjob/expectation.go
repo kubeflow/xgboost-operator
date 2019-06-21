@@ -20,6 +20,8 @@ import (
 	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
+	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -53,13 +55,18 @@ func onDependentCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool 
 		if !ok {
 			return true
 		}
+		logrus.Info("Update on create function ", xgbr.ControllerName(), " create object ", e.Meta.GetName())
 		rtype := e.Meta.GetLabels()[v1.ReplicaTypeLabel]
-		key, err := job_controller.KeyFunc(e.Meta)
-		if err != nil {
+		if len(rtype) == 0 {
 			return false
 		}
-		expectKey := job_controller.GenExpectationPodsKey(key, rtype)
-		xgbr.xgbJobController.Expectations.CreationObserved(expectKey)
+
+		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
+			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			xgbr.xgbJobController.Expectations.CreationObserved(expectKey)
+			return true
+		}
+
 		return true
 	}
 }
@@ -71,13 +78,19 @@ func onDependentDeleteFunc(r reconcile.Reconciler) func(event.DeleteEvent) bool 
 		if !ok {
 			return true
 		}
+
+		logrus.Info("Update on deleting function ", xgbr.ControllerName(), " delete object ", e.Meta.GetName())
 		rtype := e.Meta.GetLabels()[v1.ReplicaTypeLabel]
-		key, err := job_controller.KeyFunc(e.Meta)
-		if err != nil {
+		if len(rtype) == 0 {
 			return false
 		}
-		expectKey := job_controller.GenExpectationPodsKey(key, rtype)
-		xgbr.xgbJobController.Expectations.DeletionObserved(expectKey)
+
+		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
+			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			xgbr.xgbJobController.Expectations.DeleteExpectations(expectKey)
+			return true
+		}
+
 		return true
 	}
 }
