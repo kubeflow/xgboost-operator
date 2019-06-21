@@ -46,8 +46,13 @@ const (
 	labelXGBoostJobRole = "xgboostjob-job-role"
 	// gang scheduler name.
 	gangSchedulerName = "kube-batch"
+	// default cleanpod policy
 )
 
+var (
+	defaultTTLseconds     = int32(100)
+	defaultCleanPodPolicy = v1.CleanPodPolicyNone
+)
 var log = logf.Log.WithName("controller")
 
 /**
@@ -124,7 +129,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to XGBoostJob
-	err = c.Watch(&source.Kind{Type: &v1alpha1.XGBoostJob{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &v1alpha1.XGBoostJob{}}, &handler.EnqueueRequestForObject{},
+		predicate.Funcs{CreateFunc: onOwnerCreateFunc(r)},
+	)
 	if err != nil {
 		return err
 	}

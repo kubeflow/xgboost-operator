@@ -23,15 +23,21 @@ from tracker import RabitTracker
 logger = logging.getLogger(__name__)
 
 def extract_xgbooost_cluster_env():
-    master_addr = os.environ.get['MASTER_ADDR']
-    master_port = int(os.environ.get['MASTER_PORT'])
-    rank = int(os.environ.get['RANK'])
-    world_size = int(os.environ.get['WORLD_SIZE'])
+
+    logger.info("start to extract system env")
+
+    master_addr = os.environ.get("MASTER_ADDR", "{}")
+    master_port = int(os.environ.get("MASTER_PORT", "{}"))
+    rank = int(os.environ.get("RANK", "{}"))
+    world_size = int(os.environ.get("WORLD_SIZE", "{}"))
+
+    logger.info("extract the rabit env from cluster : %s, port: %d, rank: %d, word_size: %d ",
+                master_addr, master_port, rank, world_size)
 
     return master_addr, master_port, rank, world_size
 
 def setup_rabit_cluster():
-    addr, port, world_size, rank = extract_xgbooost_cluster_env()
+    addr, port, rank, world_size = extract_xgbooost_cluster_env()
 
     rabit_tracker = None
     try:
@@ -74,11 +80,12 @@ def setup_rabit_cluster():
         logger.error("something wrong happen: %s", traceback.format_exc())
         raise e
     finally:
-        logger.info("the rabit network finished!")
         if world_size > 1:
             xgb.rabit.finalize()
         if rabit_tracker:
             rabit_tracker.join()
+
+        logger.info("the rabit network testing finished!")
 
 def main():
 
@@ -95,7 +102,6 @@ def main():
     logging.info("RANK: %s", rank)
 
     setup_rabit_cluster()
-
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
