@@ -46,8 +46,13 @@ const (
 	labelXGBoostJobRole = "xgboostjob-job-role"
 	// gang scheduler name.
 	gangSchedulerName = "kube-batch"
+	// default cleanpod policy
 )
 
+var (
+	defaultTTLseconds     = int32(100)
+	defaultCleanPodPolicy = v1.CleanPodPolicyNone
+)
 var log = logf.Log.WithName("controller")
 
 /**

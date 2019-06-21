@@ -3,7 +3,6 @@ kind: "XGBoostJob"
 metadata:
   name: "xgboost-dist-test"
 spec:
-  backoffLimit: 1
   xgbReplicaSpecs:
     Master:
       replicas: 1

@@ -55,13 +55,13 @@ func (r *ReconcileXGBoostJob) DeletePod(job interface{}, pod *corev1.Pod) error 
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
 	}
 
-	logrus.Info("Deleting pod", "controller name", xgboostjob.GetName(), "pod name", pod.Namespace+"/"+pod.Name)
-
 	if err := r.Delete(context.Background(), pod); err != nil {
 		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, job_controller.FailedDeletePodReason, "Error deleting: %v", err)
 		return err
 	}
 	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeletePodReason, "Deleted pod: %v", pod.Name)
+
+	logrus.Info("Controller: ", xgboostjob.GetName(), " delete pod: ", pod.Namespace+"/"+pod.Name)
 
 	return nil
 }

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kubeflow/common/job_controller"
+	commonutil "github.com/kubeflow/common/util"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -58,6 +59,11 @@ func (r *ReconcileXGBoostJob) DeleteService(job interface{}, name string, namesp
 	logrus.Info("Deleting service ", " Controller name ", xgboostjob.GetName(), " Service name ", service.Namespace+"/"+service.Name)
 
 	if err := r.Delete(context.Background(), service); err != nil {
+		if commonutil.IsSucceeded(xgboostjob.Status.JobStatus) {
+			r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeleteServiceReason, "Deleted service: %v", name)
+			return nil
+		}
+
 		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, job_controller.FailedDeleteServiceReason, "Error deleting: %v", err)
 		return fmt.Errorf("unable to delete service: %v", err)
 	}

@@ -115,7 +115,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 		running := status.Active
 		failed := status.Failed
 
-		logrus.Infof("XGboostJob=%s, ReplicaType=%s expected=%d, running=%d, succeeded=%d , failed=%d",
+		logrus.Infof("XGBoostJob=%s, ReplicaType=%s expected=%d, running=%d, succeeded=%d , failed=%d",
 			xgboostJob.Name, rtype, expected, running, succeeded, failed)
 
 		if rtype == v1.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster) {
@@ -127,8 +127,10 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 					return err
 				}
 			}
+			// when master is succeed, the job is finished.
 			if expected == 0 {
 				msg := fmt.Sprintf("XGBoostJob %s is successfully completed.", xgboostJob.Name)
+				logrus.Info(msg)
 				r.xgbJobController.Recorder.Event(xgboostJob, k8sv1.EventTypeNormal, xgboostJobSucceededReason, msg)
 				if jobStatus.CompletionTime == nil {
 					now := metav1.Now()
@@ -139,6 +141,7 @@ func (r *ReconcileXGBoostJob) UpdateJobStatus(job interface{}, replicas map[v1.R
 					logger.LoggerForJob(xgboostJob).Infof("Append job condition error: %v", err)
 					return err
 				}
+				return nil
 			}
 		}
 		if failed > 0 {
@@ -211,6 +214,13 @@ func onOwnerCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool {
 		scheme.Scheme.Default(xgboostJob)
 		msg := fmt.Sprintf("xgboostJob %s is created.", e.Meta.GetName())
 		logrus.Info(msg)
+		//specific the run policy
+
+		if xgboostJob.Spec.RunPolicy.CleanPodPolicy == nil {
+			xgboostJob.Spec.RunPolicy.CleanPodPolicy = new(v1.CleanPodPolicy)
+			xgboostJob.Spec.RunPolicy.CleanPodPolicy = &defaultCleanPodPolicy
+		}
+
 		if err := commonutil.UpdateJobConditions(&xgboostJob.Status.JobStatus, v1.JobCreated, xgboostJobCreatedReason, msg); err != nil {
 			log.Error(err, "append job condition error")
 			return false
