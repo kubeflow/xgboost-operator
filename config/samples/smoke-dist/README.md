@@ -21,13 +21,7 @@ kubectl create -f xgboostjob_v1alpha1_rabit_test.yaml
 ```
  kubectl get -o yaml XGBoostJob/xgboost-dist-test
  ```
- 
-See the status section to monitor the job status. Here is sample output when the job is running.
-```
- kubectl get -o yaml XGBoostJob/xgboost-dist-test
- ```
- 
- The output result like this
+Here is sample output when the job is running. The output result like this
 ```
 apiVersion: xgboostjob.kubeflow.org/v1alpha1
 kind: XGBoostJob

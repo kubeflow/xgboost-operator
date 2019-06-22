@@ -14,16 +14,20 @@ import argparse
 import logging
 
 from train import train
+from utils import dump_model
 
 def main(args):
 
     if args.job_type == "Predict":
         logging.info("starting the predict job")
 
-
     elif args.job_type == "Train":
         logging.info("starting the train job")
-        train(args)
+        model = train(args)
+
+        logging.info("finish the model training, and start to dump model ")
+        model_place = args.train_input
+        dump_model(model, model_place)
 
     elif args.job_type == "All":
         logging.info("starting the train and predict job")
@@ -36,7 +40,7 @@ if __name__ == '__main__':
 
   parser.add_argument(
           '--job_type',
-           help="Train or Predict job",
+           help="Train, Predict, All types",
            required=True
           )
   parser.add_argument(
@@ -60,11 +64,6 @@ if __name__ == '__main__':
           '--model_file',
           help='Model file location for XGBoost',
           required=True
-          )
-  parser.add_argument(
-          '--test_size',
-          help='Fraction of training data to be reserved for test',
-          default=0.25
           )
   parser.add_argument(
           '--early_stopping_rounds',
