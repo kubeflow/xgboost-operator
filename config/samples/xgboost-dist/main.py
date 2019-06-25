@@ -14,26 +14,28 @@ import argparse
 import logging
 
 from train import train
+from predict import predict
 from utils import dump_model
 
 def main(args):
 
     if args.job_type == "Predict":
         logging.info("starting the predict job")
+        predict(args)
 
     elif args.job_type == "Train":
         logging.info("starting the train job")
         model = train(args)
 
         logging.info("finish the model training, and start to dump model ")
-        model_place = args.train_input
-        dump_model(model, model_place)
+        model_storage_type = args.model_storage_type
+        model_path = args.model_path
+        dump_model(model, model_storage_type, model_path, args)
 
     elif args.job_type == "All":
         logging.info("starting the train and predict job")
 
-
-    logging.info("finish distributed xgboost job")
+    logging.info("Finish distributed xgboost job")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
@@ -69,6 +71,16 @@ if __name__ == '__main__':
           '--early_stopping_rounds',
           help='XGBoost argument for stopping early',
           default=50
+          )
+  parser.add_argument(
+      '--model_path',
+      help='place to  the model',
+      default="/tmp/xgboost_model"
+          )
+  parser.add_argument(
+      '--model_storage_type',
+      help='place to stroge the model',
+      default="oss"
           )
 
   logging.basicConfig(format='%(message)s')

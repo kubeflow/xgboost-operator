@@ -11,43 +11,14 @@
 # limitations under the License.
 
 
-# Copyright 2018 Google Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import logging
-import os
 import xgboost as xgb
 import traceback
 
 from tracker import RabitTracker
-from utils import read_train_data
+from utils import read_train_data, extract_xgbooost_cluster_env
 
 logger = logging.getLogger(__name__)
-
-def extract_xgbooost_cluster_env():
-
-    logger.info("starting to extract system env")
-
-    master_addr = os.environ.get("MASTER_ADDR", "{}")
-    master_port = int(os.environ.get("MASTER_PORT", "{}"))
-    rank = int(os.environ.get("RANK", "{}"))
-    world_size = int(os.environ.get("WORLD_SIZE", "{}"))
-
-    logger.info("extract the rabit env from cluster : %s, port: %d, rank: %d, word_size: %d ",
-                master_addr, master_port, rank, world_size)
-
-    return master_addr, master_port, rank, world_size
 
 def train(args):
     """
@@ -92,7 +63,7 @@ def train(args):
         n_estimators = args.n_estimators
         learning_rate = args.learning_rate
 
-        df = read_train_data(rank=rank, path=None)
+        df = read_train_data(rank=rank, num_workers=world_size, path=None)
         kwargs = {}
         kwargs["dtrain"] = df
         kwargs["num_boost_round"] = n_estimators
