@@ -57,22 +57,25 @@ def train(args):
             rank = xgb.rabit.get_rank()
 
         else:
-            rank = -1
+            world_size = 1
             logging.info("only one node is started, start the train in a single node")
-
-        n_estimators = args.n_estimators
-        learning_rate = args.learning_rate
 
         df = read_train_data(rank=rank, num_workers=world_size, path=None)
         kwargs = {}
         kwargs["dtrain"] = df
-        kwargs["num_boost_round"] = n_estimators
-        kwargs["learning_rates"] = learning_rate
-        param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'binary:logistic'}
-        kwargs["param"] = param_xgboost_default
+        kwargs["num_boost_round"] = args.n_estimators
+        kwargs["learning_rates"] = args.learning_rate
+        kwargs["param"] = args.xgboost_parameter
 
-        logging.info("starting train xgboost at node with rank %d", rank)
-        model = xgb.train(**kwargs)
+        logging.info("starting to train xgboost at node with rank %d", rank)
+        bst = xgb.train(**kwargs)
+
+        if rank ==0:
+            model = bst
+        else:
+            model = None
+
+        logging.info("finish xgboost training at node with rank %d", rank)
 
     except Exception as e:
         logger.error("something wrong happen: %s", traceback.format_exc())

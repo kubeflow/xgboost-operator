@@ -21,6 +21,5 @@ RUN git clone --recursive https://github.com/dmlc/xgboost && \
     cd python-package; python setup.py install
 
 COPY *.py /opt/mlkube/
-COPY data/train.csv /opt/mlkube/
 
 ENTRYPOINT ["python", "/opt/mlkube/main.py"]

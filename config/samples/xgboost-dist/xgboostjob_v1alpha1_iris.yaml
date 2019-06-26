@@ -1,7 +1,7 @@
 apiVersion: "xgboostjob.kubeflow.org/v1alpha1"
 kind: "XGBoostJob"
 metadata:
-  name: "xgboost-dist-house-model"
+  name: "xgboost-dist-iris-test"
 spec:
   xgbReplicaSpecs:
     Master:
@@ -13,11 +13,21 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-house:1.0
+            image: docker.io/merlintang/xgboost-dist-iris:1.0
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
+            args:
+              - python
+              - main.py
+              - --job_type=Train
+              - --xgboost_parameter=
+              - --n_estimators=10
+              - --learning_rate=0.1
+              - --model_path="/tmp/xgboost_model"
+              - --model_storage_type=oss
+              - --oss_param="xxxx"
     Worker:
       replicas: 2
       restartPolicy: Never
@@ -27,9 +37,19 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-rabit-test:1.2
+            image: docker.io/merlintang/xgboost-dist-iris:1.0
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
+            args:
+              - python
+              - main.py
+              - --job_type=Train
+              - --xgboost_parameter=
+              - --n_estimators=10
+              - --learning_rate=0.1
+              - --model_path="/tmp/xgboost_model"
+              - --model_storage_type=oss
+              - --oss_param="xxxx"
 

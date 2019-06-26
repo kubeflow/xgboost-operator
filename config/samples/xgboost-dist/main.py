@@ -27,28 +27,28 @@ def main(args):
         logging.info("starting the train job")
         model = train(args)
 
-        logging.info("finish the model training, and start to dump model ")
-        model_storage_type = args.model_storage_type
-        model_path = args.model_path
-        dump_model(model, model_storage_type, model_path, args)
+        if model is not None:
+            logging.info("finish the model training, and start to dump model ")
+            model_storage_type = args.model_storage_type
+            model_path = args.model_path
+            dump_model(model, model_storage_type, model_path, args)
 
     elif args.job_type == "All":
         logging.info("starting the train and predict job")
 
-    logging.info("Finish distributed xgboost job")
+    logging.info("Finish distributed XGBoost job")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
           '--job_type',
-           help="Train, Predict, All types",
+           help="Train, Predict, All",
            required=True
           )
   parser.add_argument(
-          '--train_input',
-          help="Input training file",
-          nargs='+',
+          '--xgboost_parameter',
+          help='XGBoost model parameter like: objective, number_class',
           required=True
           )
   parser.add_argument(
@@ -63,24 +63,23 @@ if __name__ == '__main__':
           default=0.1
           )
   parser.add_argument(
-          '--model_file',
-          help='Model file location for XGBoost',
-          required=True
-          )
-  parser.add_argument(
           '--early_stopping_rounds',
           help='XGBoost argument for stopping early',
           default=50
           )
   parser.add_argument(
       '--model_path',
-      help='place to  the model',
+      help='place to store model',
       default="/tmp/xgboost_model"
           )
   parser.add_argument(
       '--model_storage_type',
       help='place to stroge the model',
       default="oss"
+          )
+  parser.add_argument(
+      '--oss_param',
+      help='oss parameter if you choose the model storage as OSS type',
           )
 
   logging.basicConfig(format='%(message)s')
