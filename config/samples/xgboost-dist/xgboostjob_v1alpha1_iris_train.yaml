@@ -25,7 +25,7 @@ spec:
               - --learning_rate=0.1
               - --model_path=autoAI/xgb-opt/2
               - --model_storage_type=oss
-              - --oss_param=uknown
+              - --oss_param=unknown
     Worker:
       replicas: 2
       restartPolicy: ExitCode

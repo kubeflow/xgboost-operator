@@ -11,17 +11,24 @@
 # limitations under the License.
 
 import logging
-from sklearn import datasets
 import joblib
 import xgboost as xgb
 import os
 import tempfile
 import oss2
 import json
+import pandas as pd
+
+from sklearn import datasets
 
 logger = logging.getLogger(__name__)
 
+
 def extract_xgbooost_cluster_env():
+    """
+    Extract the cluster env from pod
+    :return: the related cluster env to build rabit
+    """
 
     logger.info("starting to extract system env")
 
@@ -30,18 +37,22 @@ def extract_xgbooost_cluster_env():
     rank = int(os.environ.get("RANK", "{}"))
     world_size = int(os.environ.get("WORLD_SIZE", "{}"))
 
-    logger.info("extract the rabit env from cluster : %s, port: %d, rank: %d, word_size: %d ",
+    logger.info("extract the Rabit env from cluster :"
+                " %s, port: %d, rank: %d, word_size: %d ",
                 master_addr, master_port, rank, world_size)
 
     return master_addr, master_port, rank, world_size
 
+
 def read_train_data(rank, num_workers, path):
     """
-    Read file based on the rank of worker. In this demo, we can use the sklearn.iris data for demonstration
-    you can extend this function to read distributed data source like HDFS, HIVE etc
+    Read file based on the rank of worker.
+    We use the sklearn.iris data for demonstration
+    You can extend this to read distributed data source like HDFS, HIVE etc
     :param rank: the id of each worker
-    :param file_name: the input file name or the place to read the data
-    :return: dmatrix
+    :param num_workers: total number of workers in this cluster
+    :param path: the input file name or the place to read the data
+    :return: XGBoost Dmatrix
     """
     iris = datasets.load_iris()
     x = iris.data
@@ -51,22 +62,25 @@ def read_train_data(rank, num_workers, path):
     x = x[start:end, :]
     y = y[start:end]
 
-    import pandas as pd
     x = pd.DataFrame(x)
     y = pd.DataFrame(y)
     dtrain = xgb.DMatrix(data=x, label=y)
 
-    logging.info("Read data from IRIS data source with range from %d to %d", start, end)
+    logging.info("Read data from IRIS data source with range from %d to %d",
+                 start, end)
 
     return dtrain
 
+
 def read_predict_data(rank, num_workers, path):
     """
-    Read file based on the rank of worker. In this demo, we can use the sklearn.iris data for demonstration
-    you can extend this function to read distributed data source like HDFS, HIVE etc
+    Read file based on the rank of worker.
+    We use the sklearn.iris data for demonstration
+    You can extend this to read distributed data source like HDFS, HIVE etc
     :param rank: the id of each worker
-    :param file_name: the input file name or the place to read the data
-    :return: dmatrix, and real value
+    :param num_workers: total number of workers in this cluster
+    :param path: the input file name or the place to read the data
+    :return: XGBoost Dmatrix, and real value
     """
     iris = datasets.load_iris()
     x = iris.data
@@ -75,78 +89,77 @@ def read_predict_data(rank, num_workers, path):
     start, end = get_range_data(len(x), rank, num_workers)
     x = x[start:end, :]
     y = y[start:end]
-
-    import pandas as pd
     x = pd.DataFrame(x)
     y = pd.DataFrame(y)
 
-    logging.info("Read data from IRIS datasource with range from %d to %d", start, end)
+    logging.info("Read data from IRIS datasource with range from %d to %d",
+                 start, end)
 
     predict = xgb.DMatrix(x, label=y)
 
     return predict, y
 
+
 def get_range_data(num_row, rank, num_workers):
     """
-    compute the data slicing range based on the input data size
-    :param num_row:
-    :param rank:
-    :param num_workers:
+    compute the data range based on the input data size and worker id
+    :param num_row: total number of dataset
+    :param rank: the worker id
+    :param num_workers: total number of workers
     :return: begin and end range of input matrix
     """
-
     num_per_partition = int(num_row/num_workers)
 
     x_start = rank * num_per_partition
-    x_end = (rank + 1 ) * num_per_partition
+    x_end = (rank + 1) * num_per_partition
 
     if x_end > num_row:
         x_end = num_row
 
     return x_start, x_end
 
+
 def dump_model(model, type, model_path, args):
     """
     dump the trained model into local place
     you can update this function to store the model into a remote place
-    :param model:
-    :param path:
-    :return:
+    :param model: the xgboost trained booster
+    :param type: model storage type
+    :param model_path: place to store model
+    :param args: configuration for model storage
+    :return: True if the dump process success
     """
     if model is None:
-        raise Exception("fail to get the xgboost train model")
+        raise Exception("fail to get the XGBoost train model")
     else:
         if type == "local":
             joblib.dump(model, model_path)
             logging.info("Dump model into local place %s", model_path)
 
         elif type == "oss":
-
             oss_param = parse_parameters(args.oss_param, ",", ":")
             if oss_param is None:
-                raise Exception("Please input the oss config to store trained model")
-                return False
+                raise Exception("Please config oss parameter to store model")
 
             oss_param['path'] = args.model_path
             oss_param['endpoint'] = 'http://oss-cn-hangzhou-zmf.aliyuncs.com'
-
             dump_model_to_oss(oss_param, model)
-
             logging.info("Dump model into oss place %s", args.model_path)
 
         else:
-            logging.warning("other model storage is not supported")
+            raise Exception("Only support storage types like local and OSS")
 
     return True
+
 
 def read_model(type, model_path, args):
     """
     read model from physical storage
-    :param type:
-    :param args:
-    :return:
+    :param type: oss or local
+    :param model_path: place to store the model
+    :param args: configuration to read model
+    :return: XGBoost model
     """
-    model = None
 
     if type == "local":
         model = joblib.load(model_path)
@@ -155,7 +168,7 @@ def read_model(type, model_path, args):
     elif type == "oss":
         oss_param = parse_parameters(args.oss_param, ",", ":")
         if oss_param is None:
-            raise Exception("Please input the oss config to store trained model")
+            raise Exception("Please config oss to read model")
             return False
 
         oss_param['path'] = args.model_path
@@ -165,21 +178,23 @@ def read_model(type, model_path, args):
         logging.info("read model from oss place %s", model_path)
 
     else:
-        logging.warning("the other model storage is not supported")
+        raise Exception("Only support storage types like local and OSS")
 
     return model
+
 
 def dump_model_to_oss(oss_parameters, booster):
     """
     dump the model to remote OSS disk
-    :param oss_parameters:
-    :param booster:
-    :return:
+    :param oss_parameters: oss configuration
+    :param booster: XGBoost model
+    :return: True if stored procedure is success
     """
     """export model into oss"""
     model_fname = os.path.join(tempfile.mkdtemp(), 'model')
     text_model_fname = os.path.join(tempfile.mkdtemp(), 'model.text')
-    feature_importance = os.path.join(tempfile.mkdtemp(), 'feature_importance.json')
+    feature_importance = os.path.join(tempfile.mkdtemp(),
+                                      'feature_importance.json')
 
     oss_path = oss_parameters['path']
     logger.info('---- export model ----')
@@ -207,13 +222,14 @@ def dump_model_to_oss(oss_parameters, booster):
 
     return True
 
+
 def upload_oss(kw, local_file, oss_path):
     """
     help function to upload a model to oss
-    :param kw:
-    :param local_file:
-    :param oss_path:
-    :return:
+    :param kw: OSS parameter
+    :param local_file: local place of model
+    :param oss_path: remote place of OSS
+    :return: True if the procedure is success
     """
     if oss_path[-1] == '/':
         oss_path = '%s%s' % (oss_path, os.path.basename(local_file))
@@ -224,15 +240,18 @@ def upload_oss(kw, local_file, oss_path):
 
     try:
         bkt.put_object_from_file(key=oss_path, filename=local_file)
-        logger.info("upload %s to %s successfully!" % (os.path.abspath(local_file), oss_path))
+        logger.info("upload %s to %s successfully!" %
+                    (os.path.abspath(local_file), oss_path))
     except Exception():
-        raise ValueError('upload %s to %s failed' % (os.path.abspath(local_file), oss_path))
+        raise ValueError('upload %s to %s failed' %
+                         (os.path.abspath(local_file), oss_path))
+
 
 def read_model_from_oss(kw):
     """
-    read a model from oss
-    :param kw:
-    :return:
+    helper function to read a model from oss
+    :param kw: OSS parameter
+    :return: XGBoost booster model
     """
     auth = oss2.Auth(kw['access_id'], kw['access_key'])
     bucket = kw['access_bucket']
@@ -243,7 +262,8 @@ def read_model_from_oss(kw):
     try:
         bkt.get_object_to_file(key=oss_path, filename=temp_model_fname)
         logger.info("success to load model from oss %s", oss_path)
-    except Exception():
+    except Exception as e:
+        logging.error("fail to load model: " + e)
         raise Exception("fail to load model from oss %s", oss_path)
 
     bst = xgb.Booster({'nthread': 2})  # init model
@@ -252,7 +272,15 @@ def read_model_from_oss(kw):
 
     return bst
 
+
 def parse_parameters(input, splitter_between, splitter_in):
+    """
+    helper function parse the input parameter
+    :param input: the string of configuration like key-value paris
+    :param splitter_between: the splitter between config for input string
+    :param splitter_in: the splitter inside config for input string
+    :return: key-value pair configuration
+    """
 
     ky_paris = input.split(splitter_between)
 
@@ -268,9 +296,4 @@ def parse_parameters(input, splitter_between, splitter_in):
 
         confs[key] = value
     return confs
-
-if __name__ == '__main__':
-    rank = 1
-    place = "/tmp/data"
-    read_train_data(1, 10, place)
 

@@ -21,8 +21,7 @@ from utils import extract_xgbooost_cluster_env, read_predict_data, read_model
 def predict(args):
     """
     This is the demonstration for the batch prediction
-    :param args: the configuation for the model related config
-    :return:
+    :param args: parameter for model related config
     """
 
     addr, port, rank, world_size = extract_xgbooost_cluster_env()

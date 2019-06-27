@@ -20,14 +20,14 @@ from utils import read_train_data, extract_xgbooost_cluster_env
 
 logger = logging.getLogger(__name__)
 
+
 def train(args):
     """
-    :param args:
-    :return: xgboost model
+    :param args: configuration for train job
+    :return: XGBoost model
     """
     addr, port, rank, world_size = extract_xgbooost_cluster_env()
     rabit_tracker = None
-    model = None
 
     try:
         """start to build the network"""
@@ -39,7 +39,7 @@ def train(args):
                                      port=port, port_end=port + 1)
                 rabit.start(world_size)
                 rabit_tracker = rabit
-                logger.info('########### RabitTracker Setup Finished #########')
+                logger.info('###### RabitTracker Setup Finished ######')
 
             envs = [
                 'DMLC_NUM_WORKER=%d' % world_size,
@@ -58,19 +58,20 @@ def train(args):
 
         else:
             world_size = 1
-            logging.info("only one node is started, start the train in a single node")
+            logging.info("Start the train in a single node")
 
         df = read_train_data(rank=rank, num_workers=world_size, path=None)
         kwargs = {}
         kwargs["dtrain"] = df
         kwargs["num_boost_round"] = int(args.n_estimators)
-        param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'multi:softprob', 'num_class': 3}
+        param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1,
+                                 'objective': 'multi:softprob', 'num_class': 3}
         kwargs["params"] = param_xgboost_default
 
         logging.info("starting to train xgboost at node with rank %d", rank)
         bst = xgb.train(**kwargs)
 
-        if rank ==0:
+        if rank == 0:
             model = bst
         else:
             model = None
@@ -88,5 +89,3 @@ def train(args):
             rabit_tracker.join()
 
     return model
-
-

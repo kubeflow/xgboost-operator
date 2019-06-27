@@ -11,10 +11,10 @@
 # limitations under the License.
 
 """
-this file contains tests for xgboost model local train and predict in a single core machine.
+this file contains tests for xgboost local train and predict in single machine.
 Note: this is not for distributed train and predict test
 """
-from utils import dump_model,read_model,read_train_data, read_predict_data, parse_parameters
+from utils import dump_model, read_model, read_train_data, read_predict_data
 import xgboost as xgb
 import logging
 import numpy as np
@@ -22,17 +22,19 @@ from sklearn.metrics import precision_score
 
 logger = logging.getLogger(__name__)
 
+
 def test_train_model():
     """
-    test xgboost train in the single node
-    :return:
+    test xgboost train in a single machine
+    :return: trained model
     """
     rank = 1
     world_size = 10
     place = "/tmp/data"
     dmatrix = read_train_data(rank, world_size, place)
 
-    param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1,'objective': 'multi:softprob', 'num_class': 3}
+    param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1,
+                             'objective': 'multi:softprob', 'num_class': 3}
 
     booster = xgb.train(param_xgboost_default, dtrain=dmatrix)
 
@@ -44,7 +46,7 @@ def test_train_model():
 def test_model_predict(booster):
     """
     test xgboost train in the single node
-    :return:
+    :return: true if pass the test
     """
     rank = 1
     world_size = 10
@@ -54,18 +56,23 @@ def test_model_predict(booster):
     preds = booster.predict(dmatrix)
     best_preds = np.asarray([np.argmax(line) for line in preds])
     score = precision_score(y_test, best_preds, average='macro')
-    print(score)
+
     assert score > 0.99
 
     logging.info("Predict accuracy: %f", score)
+
+    return True
+
 
 def test_upload_model(model, model_path, args):
 
     return dump_model(model, type="local", model_path=model_path, args=args)
 
+
 def test_download_model(model_path, args):
 
-    return read_model(type="local",model_path=model_path, args=args)
+    return read_model(type="local", model_path=model_path, args=args)
+
 
 def run_test():
     args = {}
@@ -80,10 +87,10 @@ def run_test():
 
     logging.info("Finish the local test")
 
+
 if __name__ == '__main__':
 
     logging.basicConfig(format='%(message)s')
     logging.getLogger().setLevel(logging.INFO)
 
     run_test()
-

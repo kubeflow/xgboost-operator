@@ -17,6 +17,7 @@ from train import train
 from predict import predict
 from utils import dump_model
 
+
 def main(args):
 
     if args.job_type == "Predict":
@@ -38,50 +39,51 @@ def main(args):
 
     logging.info("Finish distributed XGBoost job")
 
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-          '--job_type',
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+           '--job_type',
            help="Train, Predict, All",
            required=True
+           )
+    parser.add_argument(
+           '--xgboost_parameter',
+           help='XGBoost model parameter like: objective, number_class',
           )
-  parser.add_argument(
-          '--xgboost_parameter',
-          help='XGBoost model parameter like: objective, number_class',
-          )
-  parser.add_argument(
+    parser.add_argument(
           '--n_estimators',
           help='Number of trees in the model',
           type=int,
           default=1000
           )
-  parser.add_argument(
-          '--learning_rate',
-          help='Learning rate for the model',
-          default=0.1
+    parser.add_argument(
+           '--learning_rate',
+           help='Learning rate for the model',
+           default=0.1
           )
-  parser.add_argument(
+    parser.add_argument(
           '--early_stopping_rounds',
           help='XGBoost argument for stopping early',
           default=50
           )
-  parser.add_argument(
-      '--model_path',
-      help='place to store model',
-      default="/tmp/xgboost_model"
+    parser.add_argument(
+          '--model_path',
+          help='place to store model',
+          default="/tmp/xgboost_model"
           )
-  parser.add_argument(
-      '--model_storage_type',
-      help='place to stroge the model',
-      default="oss"
+    parser.add_argument(
+          '--model_storage_type',
+          help='place to stroge the model',
+          default="oss"
           )
-  parser.add_argument(
-      '--oss_param',
-      help='oss parameter if you choose the model storage as OSS type',
+    parser.add_argument(
+          '--oss_param',
+          help='oss parameter if you choose the model storage as OSS type',
           )
 
-  logging.basicConfig(format='%(message)s')
-  logging.getLogger().setLevel(logging.INFO)
-  main_args = parser.parse_args()
-  main(main_args)
+    logging.basicConfig(format='%(message)s')
+    logging.getLogger().setLevel(logging.INFO)
+    main_args = parser.parse_args()
+    main(main_args)
