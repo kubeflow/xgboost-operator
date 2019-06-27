@@ -1,8 +1,10 @@
-### Distributed xgboost train and predicion
+### Distributed XGBoost Job train and prediction
 
-This folder containers Dockerfile and distributed XGBoost training and prediction.We use the [Iris Data Set](https://archive.ics.uci.edu/ml/datasets/iris) to demonstrate. 
-You can extend provided data reader to read data from distributed data storage like HDFS, HBase or Hive etc. 
-Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model, thus, you need to specifiy the OSS parameter in the yaml file. 
+This folder containers related files for distributed XGBoost training and prediction. In this demo,  
+[Iris Data Set](https://archive.ics.uci.edu/ml/datasets/iris) is a well known multi-class classification dataset. 
+Thus, in this demo, distributed XGBoost job is able to do multi-class classification problem. Meanwhile,
+User can extend provided data reader to read data from distributed data storage like HDFS, HBase or Hive etc. 
+
 
 **Build image**
 
@@ -17,21 +19,25 @@ Then you can push the docker image into repository
 docker push kubeflow/xgboost-dist-iris-test:1.0 ./
 ```
 
+**Configure the job runtime via Yaml file**
+
+There are two yaml files to setup distributed XGBoost computation runtime. 
+For training job, you could configure xgboostjob_v1alpha1_iris_predict.yaml. 
+Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model, 
+thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in the yaml file. 
+The oss parameter includes the account and key information. 
+Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction. 
+
 **Start the distributed XGBoost train**
 ```
 kubectl create -f xgboostjob_v1alpha1_iris_train.yaml 
-```
-
-**Start the distributed XGBoost predict**
-```shell
-kubectl create -f xgboostjob_v1alpha1_iris_predict.yaml
 ```
 
 **Look at the train job status**
 ```
  kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train
  ```
- Here is sample output when the job is finished. The output log like this
+ Here is a sample output when the job is finished. The output log like this
 ```
 Name:         xgboost-dist-iris-test
 Namespace:    default
@@ -134,11 +140,16 @@ Events:
   Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
  ```
 
-**Look at the predict job status**
+**Start the distributed XGBoost job predict**
+```shell
+kubectl create -f xgboostjob_v1alpha1_iris_predict.yaml
+```
+
+**Look at the batch predict job status**
 ```
  kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
  ```
- Here is sample output when the job is finished. The output log like this
+ Here is a sample output when the job is finished. The output log like this
 ```
 Name:         xgboost-dist-iris-test-predict
 Namespace:    default
