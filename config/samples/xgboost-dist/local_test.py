@@ -14,7 +14,7 @@
 this file contains tests for xgboost model local train and predict in a single core machine.
 Note: this is not for distributed train and predict test
 """
-from utils import dump_model,read_model,read_train_data, read_predict_data
+from utils import dump_model,read_model,read_train_data, read_predict_data, parse_parameters
 import xgboost as xgb
 import logging
 import numpy as np
@@ -31,9 +31,10 @@ def test_train_model():
     world_size = 10
     place = "/tmp/data"
     dmatrix = read_train_data(rank, world_size, place)
-    param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'multi:softprob', 'num_class': 3}
 
-    booster = xgb.train(param_xgboost_default, dmatrix)
+    param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1,'objective': 'multi:softprob', 'num_class': 3}
+
+    booster = xgb.train(param_xgboost_default, dtrain=dmatrix)
 
     assert booster is not None
 
@@ -45,7 +46,7 @@ def test_model_predict(booster):
     test xgboost train in the single node
     :return:
     """
-    rank = 2
+    rank = 1
     world_size = 10
     place = "/tmp/data"
     dmatrix, y_test = read_predict_data(rank, world_size, place)
@@ -53,7 +54,7 @@ def test_model_predict(booster):
     preds = booster.predict(dmatrix)
     best_preds = np.asarray([np.argmax(line) for line in preds])
     score = precision_score(y_test, best_preds, average='macro')
-
+    print(score)
     assert score > 0.99
 
     logging.info("Predict accuracy: %f", score)

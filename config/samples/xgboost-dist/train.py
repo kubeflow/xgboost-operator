@@ -63,9 +63,9 @@ def train(args):
         df = read_train_data(rank=rank, num_workers=world_size, path=None)
         kwargs = {}
         kwargs["dtrain"] = df
-        kwargs["num_boost_round"] = args.n_estimators
-        kwargs["learning_rates"] = args.learning_rate
-        kwargs["param"] = args.xgboost_parameter
+        kwargs["num_boost_round"] = int(args.n_estimators)
+        param_xgboost_default = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'multi:softprob', 'num_class': 3}
+        kwargs["params"] = param_xgboost_default
 
         logging.info("starting to train xgboost at node with rank %d", rank)
         bst = xgb.train(**kwargs)

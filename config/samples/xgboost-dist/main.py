@@ -49,7 +49,6 @@ if __name__ == '__main__':
   parser.add_argument(
           '--xgboost_parameter',
           help='XGBoost model parameter like: objective, number_class',
-          required=True
           )
   parser.add_argument(
           '--n_estimators',

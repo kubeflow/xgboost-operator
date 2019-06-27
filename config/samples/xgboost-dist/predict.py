@@ -37,6 +37,4 @@ def predict(args):
     best_preds = np.asarray([np.argmax(line) for line in preds])
     score = precision_score(y_test, best_preds, average='macro')
 
-    assert score > 0.99
-
     logging.info("Predict accuracy: %f", score)

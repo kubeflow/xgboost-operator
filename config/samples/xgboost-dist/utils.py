@@ -12,7 +12,7 @@
 
 import logging
 from sklearn import datasets
-from sklearn.externals import joblib
+import joblib
 import xgboost as xgb
 import os
 import tempfile
@@ -51,9 +51,12 @@ def read_train_data(rank, num_workers, path):
     x = x[start:end, :]
     y = y[start:end]
 
-    logging.info("Read data from IRIS datasource with range from %d to %d", start, end)
+    import pandas as pd
+    x = pd.DataFrame(x)
+    y = pd.DataFrame(y)
+    dtrain = xgb.DMatrix(data=x, label=y)
 
-    dtrain = xgb.DMatrix(x, label=y)
+    logging.info("Read data from IRIS data source with range from %d to %d", start, end)
 
     return dtrain
 
@@ -73,11 +76,15 @@ def read_predict_data(rank, num_workers, path):
     x = x[start:end, :]
     y = y[start:end]
 
+    import pandas as pd
+    x = pd.DataFrame(x)
+    y = pd.DataFrame(y)
+
     logging.info("Read data from IRIS datasource with range from %d to %d", start, end)
 
-    dtrain = xgb.DMatrix(x, label=y)
+    predict = xgb.DMatrix(x, label=y)
 
-    return dtrain, y
+    return predict, y
 
 def get_range_data(num_row, rank, num_workers):
     """
@@ -114,18 +121,21 @@ def dump_model(model, type, model_path, args):
             logging.info("Dump model into local place %s", model_path)
 
         elif type == "oss":
-            oss_param = args.oss
 
+            oss_param = parse_parameters(args.oss_param, ",", ":")
             if oss_param is None:
                 raise Exception("Please input the oss config to store trained model")
                 return False
 
             oss_param['path'] = args.model_path
+            oss_param['endpoint'] = 'http://oss-cn-hangzhou-zmf.aliyuncs.com'
+
             dump_model_to_oss(oss_param, model)
+
             logging.info("Dump model into oss place %s", args.model_path)
 
         else:
-            logging.warning("the other model storage is not supported")
+            logging.warning("other model storage is not supported")
 
     return True
 
@@ -136,7 +146,6 @@ def read_model(type, model_path, args):
     :param args:
     :return:
     """
-
     model = None
 
     if type == "local":
@@ -144,12 +153,15 @@ def read_model(type, model_path, args):
         logging.info("Read model from local place %s", model_path)
 
     elif type == "oss":
-        oss_param = args.oss
+        oss_param = parse_parameters(args.oss_param, ",", ":")
         if oss_param is None:
             raise Exception("Please input the oss config to store trained model")
             return False
 
-        model = read_model_from_oss(args)
+        oss_param['path'] = args.model_path
+        oss_param['endpoint'] = 'http://oss-cn-hangzhou-zmf.aliyuncs.com'
+
+        model = read_model_from_oss(oss_param)
         logging.info("read model from oss place %s", model_path)
 
     else:
@@ -207,7 +219,7 @@ def upload_oss(kw, local_file, oss_path):
         oss_path = '%s%s' % (oss_path, os.path.basename(local_file))
 
     auth = oss2.Auth(kw['access_id'], kw['access_key'])
-    bucket = kw['bucket']
+    bucket = kw['access_bucket']
     bkt = oss2.Bucket(auth=auth, endpoint=kw['endpoint'], bucket_name=bucket)
 
     try:
@@ -234,7 +246,28 @@ def read_model_from_oss(kw):
     except Exception():
         raise Exception("fail to load model from oss %s", oss_path)
 
-    return xgb.Booster.load_model(temp_model_fname)
+    bst = xgb.Booster({'nthread': 2})  # init model
+
+    bst.load_model(temp_model_fname)
+
+    return bst
+
+def parse_parameters(input, splitter_between, splitter_in):
+
+    ky_paris = input.split(splitter_between)
+
+    confs = {}
+
+    for kv in ky_paris:
+        conf = kv.split(splitter_in)
+        key = conf[0].strip(" ")
+        if key == "objective":
+            value = conf[1].strip("'") + ":" + conf[2].strip("'")
+        else:
+            value = conf[1]
+
+        confs[key] = value
+    return confs
 
 if __name__ == '__main__':
     rank = 1
