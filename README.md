@@ -7,7 +7,7 @@ Incubating project for [XGBoost](https://github.com/dmlc/xgboost) operator.
 
 This repo is currently under construction. The overall design can be found [here]( https://github.com/kubeflow/community/issues/247).
 
-The XGBoost operator makes it easy to run distributed XGBoost job training and batch prediction on Kubernetes.
+The XGBoost operator makes it easy to run distributed XGBoost job training and batch prediction on Kubernetes cluster.
 
 ## Overview 
 This repository contains the specification and implementation of `XGBoostJob` custom resource definition.
@@ -74,7 +74,7 @@ See the distributed XGBoost Job training and prediction [example](https://github
 You can change the config file and related python file (i.e., train.py or predict.py) 
 based on your requirement. 
 
-Following the steps in the example, you can deploy the XGBoost Job to start training or prediction:
+Following the job configuration guild in the example, you can deploy a XGBoost Job to start training or prediction like:
 ``` 
 ## For training job 
 kubectl create -f xgboostjob_v1alpha1_iris_train.yaml 
@@ -93,7 +93,7 @@ You can also monitor the job status.
  kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
 ``` 
 
-Here is teh sample output when job is finished. 
+Here is the sample output when training job is finished. 
 ```
 Name:         xgboost-dist-iris-test
 Namespace:    default
