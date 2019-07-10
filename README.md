@@ -17,7 +17,7 @@ This repository contains the specification and implementation of `XGBoostJob` cu
 ## Installing XGBoost Operator
 XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common). 
 
-You can follow the [installation guild of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
+You can follow the [installation guide of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
 
 You can check whether the XGBoost Job custom resource is installed via: 
 ```
