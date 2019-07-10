@@ -19,7 +19,7 @@ XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernet
 
 You can follow the [installation guide of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
 
-You can check whether the XGBoost Job custom resource is installed via: 
+You can check whether the XGBoostJob custom resource has been installed via: 
 ```
 kubectl get crd
 ``` 
