@@ -20,7 +20,7 @@ COPY config/ config/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kubeflow/xgboost-operator/cmd/manager
 
 # Copy the controller-manager into a thin image
-FROM ubuntu:latest
-WORKDIR /
+FROM registry1-docker-io.repo.lab.pl.alcatel-lucent.com/ubuntu:latest
+WORKDIR /root
 COPY --from=builder /go/src/github.com/kubeflow/xgboost-operator/manager .
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/root/manager"]
