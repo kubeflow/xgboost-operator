@@ -141,8 +141,7 @@ def dump_model(model, type, model_path, args):
             if oss_param is None:
                 raise Exception("Please config oss parameter to store model")
 
-            oss_param['path'] = args.model_path
-            oss_param['endpoint'] = 'http://oss-cn-hangzhou-zmf.aliyuncs.com'
+            oss_param['path'] = args.model_path            
             dump_model_to_oss(oss_param, model)
             logging.info("Dump model into oss place %s", args.model_path)
 
@@ -171,8 +170,7 @@ def read_model(type, model_path, args):
             raise Exception("Please config oss to read model")
             return False
 
-        oss_param['path'] = args.model_path
-        oss_param['endpoint'] = 'http://oss-cn-hangzhou-zmf.aliyuncs.com'
+        oss_param['path'] = args.model_path        
 
         model = read_model_from_oss(oss_param)
         logging.info("read model from oss place %s", model_path)
@@ -276,21 +274,21 @@ def read_model_from_oss(kw):
 def parse_parameters(input, splitter_between, splitter_in):
     """
     helper function parse the input parameter
-    :param input: the string of configuration like key-value paris
+    :param input: the string of configuration like key-value pairs
     :param splitter_between: the splitter between config for input string
     :param splitter_in: the splitter inside config for input string
     :return: key-value pair configuration
     """
 
-    ky_paris = input.split(splitter_between)
+    ky_pairs = input.split(splitter_between)
 
     confs = {}
 
-    for kv in ky_paris:
+    for kv in ky_pairs:
         conf = kv.split(splitter_in)
         key = conf[0].strip(" ")
-        if key == "objective":
-            value = conf[1].strip("'") + ":" + conf[2].strip("'")
+        if key == "objective" or key == "endpoint":
+            value = conf[1].strip("'") + ":" + conf[2].strip("'")       
         else:
             value = conf[1]
 
