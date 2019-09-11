@@ -287,8 +287,8 @@ def parse_parameters(input, splitter_between, splitter_in):
     for kv in ky_paris:
         conf = kv.split(splitter_in)
         key = conf[0].strip(" ")
-        if key == "endpoint":
-            value = conf[1].strip("'") + ":" + conf[2].strip("'")
+        if key == "objective" or key == "endpoint":
+            value = conf[1].strip("'") + ":" + conf[2].strip("'")       
         else:
             value = conf[1]
 
