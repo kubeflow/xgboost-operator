@@ -274,17 +274,17 @@ def read_model_from_oss(kw):
 def parse_parameters(input, splitter_between, splitter_in):
     """
     helper function parse the input parameter
-    :param input: the string of configuration like key-value paris
+    :param input: the string of configuration like key-value pairs
     :param splitter_between: the splitter between config for input string
     :param splitter_in: the splitter inside config for input string
     :return: key-value pair configuration
     """
 
-    ky_paris = input.split(splitter_between)
+    ky_pairs = input.split(splitter_between)
 
     confs = {}
 
-    for kv in ky_paris:
+    for kv in ky_pairs:
         conf = kv.split(splitter_in)
         key = conf[0].strip(" ")
         if key == "objective" or key == "endpoint":
