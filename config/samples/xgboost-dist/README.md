@@ -25,7 +25,9 @@ There are two yaml files to setup distributed XGBoost computation runtime.
 For training job, you could configure xgboostjob_v1alpha1_iris_predict.yaml. 
 Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model, 
 thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in the yaml file. 
-The oss parameter includes the account and key information. 
+The oss parameter includes the account information such as access_id, access_key, access_bucket and endpoint. 
+For Eg:
+--oss_param=endpoint:http://oss-ap-south-1.aliyuncs.com,access_id:XXXXXXXXXXX,access_key:XXXXXXXXXXXXXXXXXXX,access_bucket:XXXXXX
 Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction. 
 
 **Start the distributed XGBoost train**
