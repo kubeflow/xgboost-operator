@@ -20,6 +20,12 @@ from utils import dump_model
 
 def main(args):
 
+    model_storage_type = args.model_storage_type
+    if (model_storage_type == "local" or model_storage_type == "oss"):
+      print ( "The storage type is " + model_storage_type)
+    else:
+      raise Exception("Only supports storage types like local and OSS")
+
     if args.job_type == "Predict":
         logging.info("starting the predict job")
         predict(args)
@@ -30,7 +36,6 @@ def main(args):
 
         if model is not None:
             logging.info("finish the model training, and start to dump model ")
-            model_storage_type = args.model_storage_type
             model_path = args.model_path
             dump_model(model, model_storage_type, model_path, args)
 
@@ -75,7 +80,7 @@ if __name__ == '__main__':
           )
     parser.add_argument(
           '--model_storage_type',
-          help='place to stroge the model',
+          help='place to store the model',
           default="oss"
           )
     parser.add_argument(

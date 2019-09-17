@@ -145,9 +145,6 @@ def dump_model(model, type, model_path, args):
             dump_model_to_oss(oss_param, model)
             logging.info("Dump model into oss place %s", args.model_path)
 
-        else:
-            raise Exception("Only support storage types like local and OSS")
-
     return True
 
 
@@ -174,9 +171,6 @@ def read_model(type, model_path, args):
 
         model = read_model_from_oss(oss_param)
         logging.info("read model from oss place %s", model_path)
-
-    else:
-        raise Exception("Only support storage types like local and OSS")
 
     return model
 
