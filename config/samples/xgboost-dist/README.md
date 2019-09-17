@@ -1,9 +1,9 @@
 ### Distributed XGBoost Job train and prediction
 
-This folder containers related files for distributed XGBoost training and prediction. In this demo,  
-[Iris Data Set](https://archive.ics.uci.edu/ml/datasets/iris) is a well known multi-class classification dataset. 
+This folder containers related files for distributed XGBoost training and prediction. In this demo,
+[Iris Data Set](https://archive.ics.uci.edu/ml/datasets/iris) is a well known multi-class classification dataset.
 Thus, in this demo, distributed XGBoost job is able to do multi-class classification problem. Meanwhile,
-User can extend provided data reader to read data from distributed data storage like HDFS, HBase or Hive etc. 
+User can extend provided data reader to read data from distributed data storage like HDFS, HBase or Hive etc.
 
 
 **Build image**
@@ -21,18 +21,19 @@ docker push kubeflow/xgboost-dist-iris-test:1.0 ./
 
 **Configure the job runtime via Yaml file**
 
-There are two yaml files to setup distributed XGBoost computation runtime. 
-For training job, you could configure xgboostjob_v1alpha1_iris_predict.yaml. 
-Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model, 
-thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in the yaml file. 
-The oss parameter includes the account information such as access_id, access_key, access_bucket and endpoint. 
+There are four yaml files to setup distributed XGBoost computation runtime. they are : xgboostjob_v1alpha1_iris_train.yaml, xgboostjob_v1alpha1_iris_train_local.yaml, xgboostjob_v1alpha1_iris_predict.yaml, xgboostjob_v1alpha1_iris_predict_local.yaml.
+For training jobs in OSS , you could configure xgboostjob_v1alpha1_iris_train.yaml and xgboostjob_v1alpha1_iris_predict.yaml
+Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model,
+thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in xgboostjob_v1alpha1_iris_train.yaml and xgboostjob_v1alpha1_iris_predict.yaml file.
+The oss parameter includes the account information such as access_id, access_key, access_bucket and endpoint.
 For Eg:
 --oss_param=endpoint:http://oss-ap-south-1.aliyuncs.com,access_id:XXXXXXXXXXX,access_key:XXXXXXXXXXXXXXXXXXX,access_bucket:XXXXXX
-Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction. 
+Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction.
 
-**Start the distributed XGBoost train**
+
+**Start the distributed XGBoost train to store the model in OSS**
 ```
-kubectl create -f xgboostjob_v1alpha1_iris_train.yaml 
+kubectl create -f xgboostjob_v1alpha1_iris_train.yaml
 ```
 
 **Look at the train job status**
@@ -247,4 +248,243 @@ Events:
   Normal  ExitedWithCode           38s (x3 over 40s)  xgboostjob-operator  Pod: default.xgboost-dist-iris-test-predict-worker-0 exited with code 0
   Normal  ExitedWithCode           38s                xgboostjob-operator  Pod: default.xgboost-dist-iris-test-predict-master-0 exited with code 0
   Normal  XGBoostJobSucceeded      38s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test-predict is successfully completed.
+```
+
+**Start the distributed XGBoost train to store the model locally**
+Before proceeding with training we will create a PVC to store the model trained.
+Creating pvc : 
+create a yaml file with the below content 
+pvc.yaml
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: xgboostlocal
+spec:
+  storageClassName: glusterfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+```
+```
+kubectl create -f pvc.yaml
+```
+Note: Please use the storage class which supports ReadWriteMany i have used the glusterfs.
+
+Now start the distributed XGBoost train. 
+```
+kubectl create -f xgboostjob_v1alpha1_iris_train_local.yaml
+```
+
+**Look at the train job status**
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-local
+ ```
+ Here is a sample output when the job is finished. The output log like this
+```
+
+apiVersion: xgboostjob.kubeflow.org/v1alpha1
+kind: XGBoostJob
+metadata:
+  creationTimestamp: "2019-09-17T05:36:01Z"
+  generation: 7
+  name: xgboost-dist-iris-test-train_local
+  namespace: default
+  resourceVersion: "8919366"
+  selfLink: /apis/xgboostjob.kubeflow.org/v1alpha1/namespaces/default/xgboostjobs/xgboost-dist-iris-test-train_local
+  uid: 08f85fad-d90d-11e9-aca1-fa163ea13108
+spec:
+  RunPolicy:
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Train
+            - --xgboost_parameter=objective:multi:softprob,num_class:3
+            - --n_estimators=10
+            - --learning_rate=0.1
+            - --model_path=/tmp/xgboost_model/2
+            - --model_storage_type=local
+            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
+            volumeMounts:
+            - mountPath: /tmp/xgboost_model
+              name: task-pv-storage
+          volumes:
+          - name: task-pv-storage
+            persistentVolumeClaim:
+              claimName: xgboostlocal
+    Worker:
+      replicas: 2
+      restartPolicy: ExitCode
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Train
+            - --xgboost_parameter="objective:multi:softprob,num_class:3"
+            - --n_estimators=10
+            - --learning_rate=0.1
+            - --model_path=/tmp/xgboost_model/2
+            - --model_storage_type=local
+            image: bcmt-registry:5000/kubeflow/xgboost-dist-iris-test:1.0
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
+            volumeMounts:
+            - mountPath: /tmp/xgboost_model
+              name: task-pv-storage
+          volumes:
+          - name: task-pv-storage
+            persistentVolumeClaim:
+              claimName: xgboostlocal
+status:
+  completionTime: "2019-09-17T05:37:02Z"
+  conditions:
+  - lastTransitionTime: "2019-09-17T05:36:02Z"
+    lastUpdateTime: "2019-09-17T05:36:02Z"
+    message: xgboostJob xgboost-dist-iris-test-train_local is created.
+    reason: XGBoostJobCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2019-09-17T05:36:02Z"
+    lastUpdateTime: "2019-09-17T05:36:02Z"
+    message: XGBoostJob xgboost-dist-iris-test-train_local is running.
+    reason: XGBoostJobRunning
+    status: "False"
+    type: Running
+  - lastTransitionTime: "2019-09-17T05:37:02Z"
+    lastUpdateTime: "2019-09-17T05:37:02Z"
+    message: XGBoostJob xgboost-dist-iris-test-train_local is successfully completed.
+    reason: XGBoostJobSucceeded
+    status: "True"
+    type: Succeeded
+  replicaStatuses:
+    Master:
+      succeeded: 1
+    Worker:
+      succeeded: 2 
+ ```
+**Start the distributed XGBoost job predict**
+```
+kubectl create -f xgboostjob_v1alpha1_iris_predict_local.yaml
+```
+
+**Look at the batch predict job status**
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict-local
+ ```
+ Here is a sample output when the job is finished. The output log like this
+```
+apiVersion: xgboostjob.kubeflow.org/v1alpha1
+kind: XGBoostJob
+metadata:
+  creationTimestamp: "2019-09-17T06:33:38Z"
+  generation: 6
+  name: xgboost-dist-iris-test-predict_local
+  namespace: default
+  resourceVersion: "8976054"
+  selfLink: /apis/xgboostjob.kubeflow.org/v1alpha1/namespaces/default/xgboostjobs/xgboost-dist-iris-test-predict_local
+  uid: 151655b0-d915-11e9-aca1-fa163ea13108
+spec:
+  RunPolicy:
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Predict
+            - --model_path=/tmp/xgboost_model/2
+            - --model_storage_type=local
+            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
+            volumeMounts:
+            - mountPath: /tmp/xgboost_model
+              name: task-pv-storage
+          volumes:
+          - name: task-pv-storage
+            persistentVolumeClaim:
+              claimName: xgboostlocal
+    Worker:
+      replicas: 2
+      restartPolicy: ExitCode
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Predict
+            - --model_path=/tmp/xgboost_model/2
+            - --model_storage_type=local
+            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
+            volumeMounts:
+            - mountPath: /tmp/xgboost_model
+              name: task-pv-storage
+          volumes:
+          - name: task-pv-storage
+            persistentVolumeClaim:
+              claimName: xgboostlocal
+status:
+  completionTime: "2019-09-17T06:33:51Z"
+  conditions:
+  - lastTransitionTime: "2019-09-17T06:33:38Z"
+    lastUpdateTime: "2019-09-17T06:33:38Z"
+    message: xgboostJob xgboost-dist-iris-test-predict_local is created.
+    reason: XGBoostJobCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2019-09-17T06:33:38Z"
+    lastUpdateTime: "2019-09-17T06:33:38Z"
+    message: XGBoostJob xgboost-dist-iris-test-predict_local is running.
+    reason: XGBoostJobRunning
+    status: "False"
+    type: Running
+  - lastTransitionTime: "2019-09-17T06:33:51Z"
+    lastUpdateTime: "2019-09-17T06:33:51Z"
+    message: XGBoostJob xgboost-dist-iris-test-predict_local is successfully completed.
+    reason: XGBoostJobSucceeded
+    status: "True"
+    type: Succeeded
+  replicaStatuses:
+    Master:
+      succeeded: 1
+    Worker:
+      succeeded: 1
 ```
