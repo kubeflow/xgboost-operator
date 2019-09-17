@@ -75,7 +75,7 @@ if __name__ == '__main__':
           )
     parser.add_argument(
           '--model_storage_type',
-          help='place to stroge the model',
+          help='place to store the model',
           default="oss"
           )
     parser.add_argument(
