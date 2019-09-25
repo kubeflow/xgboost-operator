@@ -29,7 +29,8 @@ def predict(args):
     dmatrix, y_test = read_predict_data(rank, world_size, None)
 
     model_path = args.model_path
-    booster = read_model("oss", model_path, args)
+    storage_type = args.model_storage_type
+    booster = read_model(storage_type, model_path, args)
 
     preds = booster.predict(dmatrix)
 
