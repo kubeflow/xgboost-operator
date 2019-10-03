@@ -1,0 +1,18 @@
+# This file configures the workflows to trigger in our Prow jobs.
+# see kubeflow/testing/py/run_e2e_workflow.py
+workflows:
+  - app_dir: kubeflow/xgboost-operator/test/workflows
+  # this super-short names are required so that identity lengths will be shorter than 64
+    component: build
+    name: build
+    job_types:
+      - presubmit
+    params:
+      registry: "gcr.io/kubeflow-ci"
+  - app_dir: kubeflow/xgboost-operator/test/workflows
+    component: build
+    name: build
+    job_types:
+      - postsubmit
+    params:
+      registry: "gcr.io/kubeflow-images-public"
