@@ -13,7 +13,6 @@
 # VIM temporary files.
 .swp
 
-vendor/
 
 cover.out
 bin/

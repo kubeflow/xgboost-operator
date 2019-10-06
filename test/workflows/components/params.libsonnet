@@ -4,7 +4,7 @@
     // replicas: 4,
   },
   components: {
-    builddocker: {
+    build: {
       bucket: "kubeflow-ci_temp",
       cluster: "kubeflow-testing",
       dockerfile: "Dockerfile",
