@@ -17,4 +17,4 @@ generatorOptions:
 images:
   - name: gcr.io/kubeflow-images-public/xgboost-operator
     newName: gcr.io/kubeflow-images-public/xgboost-operator
-    newTag: v1.0
+    newTag: 8e29825
