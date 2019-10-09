@@ -31,7 +31,9 @@ import (
 
 func main() {
 	var metricsAddr string
+	var mode string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&mode, "mode", "local", "The mode in which xgboost-operator to run")
 	flag.Parse()
 	logf.SetLogger(logf.ZapLogger(false))
 	log := logf.Log.WithName("entrypoint")
