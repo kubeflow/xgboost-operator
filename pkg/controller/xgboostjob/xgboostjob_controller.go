@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	k8scontroller "k8s.io/kubernetes/pkg/controller"
@@ -78,8 +79,9 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	r.recorder = mgr.GetRecorder(r.ControllerName())
 
+	var mode string
 	var kubeconfig *string
-
+	var kcfg *rest.Config
 	if home := homeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig_", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
@@ -87,11 +89,28 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	}
 	flag.Parse()
 
-	/// TODO, add the master url and kubeconfigpath with user input
-	kcfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		log.Info("Error building kubeconfig: %s", err.Error())
-		panic(err.Error())
+	mode = flag.Lookup("mode").Value.(flag.Getter).Get().(string)
+	if mode == "local" {
+		log.Info("Running controller in local mode, using kubeconfig file")
+		/// TODO, add the master url and kubeconfigpath with user input
+		kcfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+		if err != nil {
+			log.Info("Error building kubeconfig: %s", err.Error())
+			panic(err.Error())
+		}
+		_ = kcfg
+	} else if mode == "in-cluster" {
+		log.Info("Running controller in in-cluster mode")
+		/// TODO, add the master url and kubeconfigpath with user input
+		kcfg, err := rest.InClusterConfig()
+		if err != nil {
+			log.Info("Error getting in-cluster kubeconfig")
+			panic(err.Error())
+		}
+		_ = kcfg
+	} else {
+		log.Info("Given mode is not valid: ", "mode", mode)
+		panic("-mode should be either local or in-cluster")
 	}
 
 	// Create clients.
