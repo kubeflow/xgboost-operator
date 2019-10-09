@@ -21,6 +21,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kube
 
 # Copy the controller-manager into a thin image
 FROM ubuntu:latest
-WORKDIR /
+WORKDIR /root
 COPY --from=builder /go/src/github.com/kubeflow/xgboost-operator/manager .
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/root/manager"]
