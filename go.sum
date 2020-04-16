@@ -134,6 +134,7 @@ github.com/kubeflow/common v0.0.0-20190612032929-2648a6845fbd h1:GcgY7Az40VJns6y
 github.com/kubeflow/common v0.0.0-20190612032929-2648a6845fbd/go.mod h1:KRw7y0Y6NLz+H+DBqnzljPwIDUuaCWi4cCzCItX1gv8=
 github.com/kubeflow/common v0.0.0-20190619012831-09e1ac17011c h1:7UHSPFHMplWl3hunHApV26JvtGBTRZHYHpXWs/FhaWw=
 github.com/kubeflow/common v0.0.0-20190619012831-09e1ac17011c/go.mod h1:KRw7y0Y6NLz+H+DBqnzljPwIDUuaCWi4cCzCItX1gv8=
+github.com/kubeflow/common v0.0.0-20200415213045-b8d5dcab1594 h1:ePJKi7VwUUevG/Ma5vEV87c7h0mzeh5xgLSWYtD1wN8=
 github.com/kubernetes-sigs/kube-batch v0.4.2 h1:CcFsYiHz1d9adH/jz7nFmjkdZnkPoq9oaWBLBVp5kms=
 github.com/kubernetes-sigs/kube-batch v0.4.2/go.mod h1:UI2ZUDvosfoXEO3dbyttgTBXsYMSvqBJ7CL84giPlxQ=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
