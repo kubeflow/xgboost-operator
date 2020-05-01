@@ -281,5 +281,5 @@ func (r *ReconcileXGBoostJob) IsMasterRole(replicas map[v1.ReplicaType]*v1.Repli
 
 // SetClusterSpec sets the cluster spec for the pod
 func (r *ReconcileXGBoostJob) SetClusterSpec(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
-	return SetPodEnv(job, podTemplate, index)
+	return SetPodEnv(job, podTemplate, rtype, index)
 }

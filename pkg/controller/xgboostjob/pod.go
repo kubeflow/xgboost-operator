@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/kubeflow/common/job_controller"
+	common "github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -97,7 +98,7 @@ func convertPodList(list []corev1.Pod) []*corev1.Pod {
 }
 
 // Set the pod env set for XGBoost Rabit Tracker and worker
-func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, index string) error {
+func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
 	xgboostjob, ok := job.(*v1alpha1.XGBoostJob)
 	if !ok {
 		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
@@ -106,6 +107,13 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, index strin
 	rank, err := strconv.Atoi(index)
 	if err != nil {
 		return err
+	}
+
+	// Add master offset for worker pods
+	if strings.ToLower(rtype) == strings.ToLower(string(v1alpha1.XGBoostReplicaTypeWorker)) {
+		masterSpec := xgboostjob.Spec.XGBReplicaSpecs[common.ReplicaType(v1alpha1.XGBoostReplicaTypeMaster)]
+		masterReplicas := int(*masterSpec.Replicas)
+		rank += masterReplicas
 	}
 
 	masterAddr := computeMasterAddr(xgboostjob.Name, strings.ToLower(string(v1alpha1.XGBoostReplicaTypeMaster)), strconv.Itoa(0))
