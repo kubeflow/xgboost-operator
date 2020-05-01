@@ -110,19 +110,19 @@ func TestClusterSpec(t *testing.T) {
 		tc{
 			job:                 NewXGBoostJobWithMaster(2),
 			rt:                  v1alpha1.XGBoostReplicaTypeWorker,
-			index:               "1",
+			index:               "0",
 			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0"},
 		},
 		tc{
 			job:                 NewXGBoostJobWithMaster(2),
 			rt:                  v1alpha1.XGBoostReplicaTypeWorker,
 			index:               "1",
-			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0"},
+			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "2", "MASTER_ADDR": "test-xgboostjob-master-0"},
 		},
 	}
 	for _, c := range testCase {
 		demoTemplateSpec := c.job.Spec.XGBReplicaSpecs[common.ReplicaType(c.rt)].Template
-		if err := SetPodEnv(c.job, &demoTemplateSpec, c.index); err != nil {
+		if err := SetPodEnv(c.job, &demoTemplateSpec, string(c.rt), c.index); err != nil {
 			t.Errorf("Failed to set cluster spec: %v", err)
 		}
 		actual := demoTemplateSpec.Spec.Containers[0].Env
