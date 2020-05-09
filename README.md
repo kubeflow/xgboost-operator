@@ -15,6 +15,15 @@ This repository contains the specification and implementation of `XGBoostJob` cu
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
 
 ## Installing XGBoost Operator
+You can deploy the operator with default settings by running the following commands
+```
+git clone https://github.com/kubeflow/xgboost-operator
+cd xgboost-operator
+kubectl create -f manifests/xgboost-operator/base/cluster-role.yaml
+kubectl create -f manifests/xgboost-operator/base/crd.yaml
+kubectl create -f manifests/xgboost-operator/base/service-account.yaml
+kubectl create -f config/rbac/rbac_role_binding.yaml
+```
 XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common). 
 
 You can follow the [installation guide of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
@@ -75,10 +84,12 @@ based on your requirement.
 Following the job configuration guild in the example, you can deploy a XGBoost Job to start training or prediction like:
 ``` 
 ## For training job 
-kubectl create -f xgboostjob_v1alpha1_iris_train.yaml 
+cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
+kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
 
-## For bath prediction job 
-kubectl create -f xgboostjob_v1alpha1_iris_predict.yaml
+## For batch prediction job 
+cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
+kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
 ``` 
 
 ## Monitor a distributed XGBoost Job 
