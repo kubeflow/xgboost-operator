@@ -193,3 +193,16 @@ Events:
   Normal  ExitedWithCode           47s                xgboostjob-operator  Pod: default.xgboost-dist-iris-test-master-0 exited with code 0
   Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
  ```
+
+
+# Docker Images
+
+You can use the following Dockerfiles to build the images yourself:
+
+* [xgboost-operator](https://github.com/kubeflow/xgboost-operator/blob/master/Dockerfile)
+
+For your convenience, you can download built xgboost-operator image by:
+
+```
+docker pull stevendoit/xgboost-operator:1.0
+```
