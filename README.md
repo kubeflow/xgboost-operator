@@ -201,8 +201,6 @@ You can use the following Dockerfiles to build the images yourself:
 
 * [xgboost-operator](https://github.com/kubeflow/xgboost-operator/blob/master/Dockerfile)
 
-For your convenience, you can download built xgboost-operator image by:
+For your convenience, you can download built xgboost-operator image from:
 
-```
-docker pull stevendoit/xgboost-operator:1.0
-```
+* [GCP-xgboost-operator-images](gcr.io/kubeflow-images-public/xgboost-operator)
