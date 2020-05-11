@@ -23,6 +23,7 @@ kubectl create -f manifests/xgboost-operator/base/cluster-role.yaml
 kubectl create -f manifests/xgboost-operator/base/crd.yaml
 kubectl create -f manifests/xgboost-operator/base/service-account.yaml
 kubectl create -f config/rbac/rbac_role_binding.yaml
+kubectl create -f manifests/xgboost-operator/base/deployment.yaml
 ```
 ## Build XGBoost Operator
 XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common). 
