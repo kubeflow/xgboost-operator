@@ -1,10 +1,9 @@
 apiVersion: extensions/v1
 kind: Deployment
 metadata:
-  name: xgboost-operator
-  namespace: xgboost-operator
+  name: deployment
   labels:
-    app: xgboost-operator
+  app: xgboost-operator
 spec:
   replicas: 1
   selector:
