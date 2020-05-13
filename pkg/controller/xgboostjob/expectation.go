@@ -55,12 +55,12 @@ func onDependentCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool 
 		if !ok {
 			return true
 		}
-		logrus.Info("Update on create function ", xgbr.ControllerName(), " create object ", e.Meta.GetName())
 		rtype := e.Meta.GetLabels()[v1.ReplicaTypeLabel]
 		if len(rtype) == 0 {
 			return false
 		}
 
+		logrus.Info("Update on create function ", xgbr.ControllerName(), " create object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
 			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
 			xgbr.xgbJobController.Expectations.CreationObserved(expectKey)
@@ -79,12 +79,12 @@ func onDependentDeleteFunc(r reconcile.Reconciler) func(event.DeleteEvent) bool 
 			return true
 		}
 
-		logrus.Info("Update on deleting function ", xgbr.ControllerName(), " delete object ", e.Meta.GetName())
 		rtype := e.Meta.GetLabels()[v1.ReplicaTypeLabel]
 		if len(rtype) == 0 {
 			return false
 		}
 
+		logrus.Info("Update on deleting function ", xgbr.ControllerName(), " delete object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
 			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
 			xgbr.xgbJobController.Expectations.DeleteExpectations(expectKey)

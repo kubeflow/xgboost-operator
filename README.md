@@ -58,22 +58,21 @@ make install
 make run 
 ``` 
 If the XGBoost Job operator can be installed into cluster, you can view the logs likes this 
-``` 
-INFO[0000] Update on create function xgboostjob-operator create object kubernetes 
-INFO[0000] Update on create function xgboostjob-operator create object kube-dns 
-INFO[0000] Update on create function xgboostjob-operator create object kubernetes-dashboard 
-INFO[0000] Update on create function xgboostjob-operator create object storage-provisioner 
-INFO[0000] Update on create function xgboostjob-operator create object kube-proxy-6l7mk 
-INFO[0000] Update on create function xgboostjob-operator create object coredns-fb8b8dccf-mfsdw 
-INFO[0000] Update on create function xgboostjob-operator create object coredns-fb8b8dccf-tx8nz 
-INFO[0000] Update on create function xgboostjob-operator create object etcd-minikube 
-INFO[0000] Update on create function xgboostjob-operator create object kube-addon-manager-minikube 
-INFO[0000] Update on create function xgboostjob-operator create object kube-apiserver-minikube 
-INFO[0000] Update on create function xgboostjob-operator create object kube-controller-manager-minikube 
-INFO[0000] Update on create function xgboostjob-operator create object kube-scheduler-minikube 
-INFO[0000] Update on create function xgboostjob-operator create object kubernetes-dashboard-79dd6bfc48-dvqzq 
-{"level":"info","ts":1561676117.843403,"logger":"kubebuilder.controller","msg":"Starting Controller","controller":"xgboostjob-controller"}
-{"level":"info","ts":1561676117.947829,"logger":"kubebuilder.controller","msg":"Starting workers","controller":"xgboostjob-controller","worker count":1}  
+```
+{"level":"info","ts":1589406873.090652,"logger":"entrypoint","msg":"setting up client for manager"}
+{"level":"info","ts":1589406873.0991302,"logger":"entrypoint","msg":"setting up manager"}
+{"level":"info","ts":1589406874.2192929,"logger":"entrypoint","msg":"Registering Components."}
+{"level":"info","ts":1589406874.219318,"logger":"entrypoint","msg":"setting up scheme"}
+{"level":"info","ts":1589406874.219448,"logger":"entrypoint","msg":"Setting up controller"}
+{"level":"info","ts":1589406874.2194738,"logger":"controller","msg":"Running controller in local mode, using kubeconfig file"}
+{"level":"info","ts":1589406874.224564,"logger":"controller","msg":"gang scheduling is set: ","gangscheduling":false}
+{"level":"info","ts":1589406874.2247412,"logger":"kubebuilder.controller","msg":"Starting EventSource","controller":"xgboostjob-controller","source":"kind source: /, Kind="}
+{"level":"info","ts":1589406874.224958,"logger":"kubebuilder.controller","msg":"Starting EventSource","controller":"xgboostjob-controller","source":"kind source: /, Kind="}
+{"level":"info","ts":1589406874.2251048,"logger":"kubebuilder.controller","msg":"Starting EventSource","controller":"xgboostjob-controller","source":"kind source: /, Kind="}
+{"level":"info","ts":1589406874.225237,"logger":"entrypoint","msg":"setting up webhooks"}
+{"level":"info","ts":1589406874.225247,"logger":"entrypoint","msg":"Starting the Cmd."}
+{"level":"info","ts":1589406874.32791,"logger":"kubebuilder.controller","msg":"Starting Controller","controller":"xgboostjob-controller"}
+{"level":"info","ts":1589406874.430336,"logger":"kubebuilder.controller","msg":"Starting workers","controller":"xgboostjob-controller","worker count":1}
 ``` 
 ## Creating a XGBoost Training/Prediction Job
 

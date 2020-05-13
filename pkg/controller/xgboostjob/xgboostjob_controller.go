@@ -20,7 +20,6 @@ import (
 	"github.com/kubeflow/common/job_controller"
 	"github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/sirupsen/logrus"
@@ -151,14 +150,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(&source.Kind{Type: &v1alpha1.XGBoostJob{}}, &handler.EnqueueRequestForObject{},
 		predicate.Funcs{CreateFunc: onOwnerCreateFunc(r)},
 	)
-	if err != nil {
-		return err
-	}
-
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &v1alpha1.XGBoostJob{},
-	})
 	if err != nil {
 		return err
 	}
