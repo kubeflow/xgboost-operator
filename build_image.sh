@@ -10,6 +10,7 @@ set -ex
 DOCKERFILE=$1
 CONTEXT_DIR=$(dirname "$DOCKERFILE")
 IMAGE=$2
+TIMEOUT=30m
 
 cd $CONTEXT_DIR
 TAG=$(git describe --tags --always --dirty)
@@ -17,5 +18,5 @@ TAG=$(git describe --tags --always --dirty)
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 
 echo "Building ${IMAGE} using gcloud build"
-gcloud builds submit --tag=${IMAGE}:${TAG} --project=${GCP_PROJECT} .
+gcloud builds submit --tag=${IMAGE}:${TAG} --project=${GCP_PROJECT} --timeout=${TIMEOUT} .
 echo "Finished building ${IMAGE}:${TAG}"
