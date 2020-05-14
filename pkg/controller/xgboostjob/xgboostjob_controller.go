@@ -76,7 +76,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		scheme: mgr.GetScheme(),
 	}
 
-	r.recorder = mgr.GetRecorder(r.ControllerName())
+	r.recorder = mgr.GetEventRecorderFor(r.ControllerName())
 
 	var mode string
 	var kubeconfig *string

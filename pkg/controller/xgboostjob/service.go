@@ -84,7 +84,7 @@ func (r *ReconcileXGBoostJob) GetServicesForJob(obj interface{}) ([]*corev1.Serv
 	// List all pods to include those that don't match the selector anymore
 	// but have a ControllerRef pointing to this controller.
 	serviceList := &corev1.ServiceList{}
-	err = r.List(context.Background(), client.MatchingLabels(r.xgbJobController.GenLabels(job.GetName())), serviceList)
+	err = r.List(context.Background(), serviceList, client.MatchingLabels(r.xgbJobController.GenLabels(job.GetName())))
 	if err != nil {
 		return nil, err
 	}
