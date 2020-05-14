@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.11.4 as builder
+FROM golang:1.12.17 as builder
 
 ENV GO111MODULE=on
 
@@ -8,7 +8,6 @@ WORKDIR /go/src/github.com/kubeflow/xgboost-operator
 
 COPY go.mod .
 COPY go.sum .
-# COPY vendor/ vendor/
 
 RUN go mod download
 
