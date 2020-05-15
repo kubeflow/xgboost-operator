@@ -15,16 +15,23 @@ This repository contains the specification and implementation of `XGBoostJob` cu
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
 
 ## Install XGBoost Operator
-You can deploy the operator with default settings by running the following commands
+
+You can deploy the operator with default settings by running the following commands using [kustomize](https://github.com/kubernetes-sigs/kustomize):
+
+```bash
+git clone https://github.com/kubeflow/manifests
+cd manifests/xgboost-job/xgboost-operator
+kustomize build base | kubectl apply -f -
 ```
-git clone https://github.com/kubeflow/xgboost-operator
-cd xgboost-operator
-kubectl create -f manifests/xgboost-operator/base/cluster-role.yaml
-kubectl create -f manifests/xgboost-operator/base/crd.yaml
-kubectl create -f manifests/xgboost-operator/base/service-account.yaml
-kubectl create -f config/rbac/rbac_role_binding.yaml
+
+Note that since Kubernetes v1.14, `kustomize` became a subcommand in `kubectl` so you can also run the following command instead:
+
+```bash
+kubectl kustomize base | kubectl apply -f -
 ```
+
 ## Build XGBoost Operator
+
 XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common). 
 
 You can follow the [installation guide of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
