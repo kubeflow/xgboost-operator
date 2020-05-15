@@ -21,6 +21,7 @@ You can deploy the operator with default settings by running the following comma
 ```bash
 git clone https://github.com/kubeflow/manifests
 cd manifests/xgboost-job/xgboost-operator
+kubectl create namespace kubeflow
 kustomize build base | kubectl apply -f -
 ```
 
