@@ -21,6 +21,7 @@ import (
 	"github.com/kubeflow/common/job_controller/api/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
 	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -62,7 +63,14 @@ func onDependentCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool 
 
 		logrus.Info("Update on create function ", xgbr.ControllerName(), " create object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
-			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			var expectKey string
+			if _, ok := e.Object.(*corev1.Pod); ok {
+				expectKey = job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			}
+
+			if _, ok := e.Object.(*corev1.Service); ok {
+				expectKey = job_controller.GenExpectationServicesKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			}
 			xgbr.xgbJobController.Expectations.CreationObserved(expectKey)
 			return true
 		}
@@ -86,7 +94,14 @@ func onDependentDeleteFunc(r reconcile.Reconciler) func(event.DeleteEvent) bool 
 
 		logrus.Info("Update on deleting function ", xgbr.ControllerName(), " delete object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
-			expectKey := job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			var expectKey string
+			if _, ok := e.Object.(*corev1.Pod); ok {
+				expectKey = job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			}
+
+			if _, ok := e.Object.(*corev1.Service); ok {
+				expectKey = job_controller.GenExpectationServicesKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+			}
 			xgbr.xgbJobController.Expectations.DeleteExpectations(expectKey)
 			return true
 		}
