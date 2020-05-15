@@ -64,10 +64,10 @@ func onDependentCreateFunc(r reconcile.Reconciler) func(event.CreateEvent) bool 
 		logrus.Info("Update on create function ", xgbr.ControllerName(), " create object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
 			var expectKey string
+			jobKey := e.Meta.GetNamespace() + "/" + controllerRef.Name
 			if _, ok := e.Object.(*corev1.Pod); ok {
-				expectKey = job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+				expectKey = job_controller.GenExpectationPodsKey(jobKey, rtype)
 			}
-
 			if _, ok := e.Object.(*corev1.Service); ok {
 				expectKey = job_controller.GenExpectationServicesKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
 			}
@@ -95,12 +95,12 @@ func onDependentDeleteFunc(r reconcile.Reconciler) func(event.DeleteEvent) bool 
 		logrus.Info("Update on deleting function ", xgbr.ControllerName(), " delete object ", e.Meta.GetName())
 		if controllerRef := metav1.GetControllerOf(e.Meta); controllerRef != nil {
 			var expectKey string
+			jobKey := e.Meta.GetNamespace() + "/" + controllerRef.Name
 			if _, ok := e.Object.(*corev1.Pod); ok {
-				expectKey = job_controller.GenExpectationPodsKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+				expectKey = job_controller.GenExpectationPodsKey(jobKey, rtype)
 			}
-
 			if _, ok := e.Object.(*corev1.Service); ok {
-				expectKey = job_controller.GenExpectationServicesKey(e.Meta.GetNamespace()+"/"+controllerRef.Name, rtype)
+				expectKey = job_controller.GenExpectationServicesKey(jobKey, rtype)
 			}
 			xgbr.xgbJobController.Expectations.DeleteExpectations(expectKey)
 			return true
