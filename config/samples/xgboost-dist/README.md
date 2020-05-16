@@ -55,14 +55,24 @@ For Eg:
 Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction.
 
 
-**Start the distributed XGBoost train to store the model in OSS**
+**Start the distributed XGBoost train to store the model in cloud**
+if you use OSS
 ```
 kubectl create -f xgboostjob_v1alpha1_iris_train_oss.yaml
 ```
+if you use GCP
+```
+kubectl create -f xgboostjob_v1alpha1_iris_train_gcp.yaml
+```
 
 **Look at the train job status**
+If you use OSS
 ```
- kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-oss
+ ```
+If you use GCP
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-gcp
  ```
  Here is a sample output when the job is finished. The output log like this
 ```
@@ -167,14 +177,24 @@ Events:
   Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
  ```
 
-**Start the distributed XGBoost job predict**
-```shell
+**Start the distributed XGBoost job predict in cloud**
+If you use OSS
+```
 kubectl create -f xgboostjob_v1alpha1_iris_predict_oss.yaml
+```
+If you use GCP
+```
+kubectl create -f xgboostjob_v1alpha1_iris_predict_GCP.yaml
 ```
 
 **Look at the batch predict job status**
+If you use OSS
 ```
- kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict-oss
+ ```
+If you use GCP
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict-gcp
  ```
  Here is a sample output when the job is finished. The output log like this
 ```
