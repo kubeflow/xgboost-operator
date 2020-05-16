@@ -1,7 +1,7 @@
 apiVersion: "xgboostjob.kubeflow.org/v1alpha1"
 kind: "XGBoostJob"
 metadata:
-  name: "xgboost-dist-iris-test-train"
+  name: "xgboost-dist-iris-test-train-gcp"
 spec:
   xgbReplicaSpecs:
     Master:
