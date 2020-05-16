@@ -56,16 +56,18 @@ Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost jo
 
 
 **Start the distributed XGBoost train to store the model in cloud**
-if you use OSS
+
+If you use OSS
 ```
 kubectl create -f xgboostjob_v1alpha1_iris_train_oss.yaml
 ```
-if you use GCP
+If you use GCP
 ```
 kubectl create -f xgboostjob_v1alpha1_iris_train_gcp.yaml
 ```
 
 **Look at the train job status**
+
 If you use OSS
 ```
  kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-oss
@@ -178,13 +180,14 @@ Events:
  ```
 
 **Start the distributed XGBoost job predict in cloud**
+
 If you use OSS
 ```
 kubectl create -f xgboostjob_v1alpha1_iris_predict_oss.yaml
 ```
 If you use GCP
 ```
-kubectl create -f xgboostjob_v1alpha1_iris_predict_GCP.yaml
+kubectl create -f xgboostjob_v1alpha1_iris_predict_gcp.yaml
 ```
 
 **Look at the batch predict job status**
