@@ -24,8 +24,8 @@ spec:
               - --n_estimators=10
               - --learning_rate=0.1
               - --model_path=autoAI/xgb-opt/2
-              - --model_storage_type=gcr
-              - --gcr_param=unknown
+              - --model_storage_type=gcp
+              - --gcp_param=unknown
     Worker:
       replicas: 2
       restartPolicy: ExitCode
