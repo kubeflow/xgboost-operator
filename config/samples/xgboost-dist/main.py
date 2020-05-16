@@ -21,10 +21,10 @@ from utils import dump_model
 def main(args):
 
     model_storage_type = args.model_storage_type
-    if (model_storage_type == "local" or model_storage_type == "oss"):
+    if (model_storage_type == "local" or model_storage_type == "oss" or model_storage_typr == 'gcp'):
       print ( "The storage type is " + model_storage_type)
     else:
-      raise Exception("Only supports storage types like local and OSS")
+      raise Exception("Only supports storage types like local, OSS and GCP")
 
     if args.job_type == "Predict":
         logging.info("starting the predict job")
@@ -66,11 +66,13 @@ if __name__ == '__main__':
     parser.add_argument(
            '--learning_rate',
            help='Learning rate for the model',
+           type=int,
            default=0.1
           )
     parser.add_argument(
           '--early_stopping_rounds',
           help='XGBoost argument for stopping early',
+          type=int,
           default=50
           )
     parser.add_argument(
@@ -85,7 +87,11 @@ if __name__ == '__main__':
           )
     parser.add_argument(
           '--oss_param',
-          help='oss parameter if you choose the model storage as OSS type',
+          help='oss parameter if you choose the model storage as OSS type'
+          )
+    parser.add_argument(
+          '--gcp_param',
+          help='gcp parameter if you choose the model storage as GCP type'
           )
 
     logging.basicConfig(format='%(message)s')

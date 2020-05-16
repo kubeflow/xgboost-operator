@@ -15,6 +15,7 @@ import joblib
 import xgboost as xgb
 import os
 import tempfile
+from googel.cloud import storage
 import oss2
 import json
 import pandas as pd
@@ -59,7 +60,7 @@ def read_train_data(rank, num_workers, path):
     y = iris.target
 
     start, end = get_range_data(len(x), rank, num_workers)
-    x = x[start:end, :]
+    x = x[start:end]
     y = y[start:end]
 
     x = pd.DataFrame(x)
@@ -87,7 +88,7 @@ def read_predict_data(rank, num_workers, path):
     y = iris.target
 
     start, end = get_range_data(len(x), rank, num_workers)
-    x = x[start:end, :]
+    x = x[start:end]
     y = y[start:end]
     x = pd.DataFrame(x)
     y = pd.DataFrame(y)
@@ -113,7 +114,7 @@ def get_range_data(num_row, rank, num_workers):
     x_start = rank * num_per_partition
     x_end = (rank + 1) * num_per_partition
 
-    if x_end > num_row:
+    if x_end > num_row or (rank==num_workers-1 and x_end< num_row):
         x_end = num_row
 
     return x_start, x_end
@@ -140,10 +141,18 @@ def dump_model(model, type, model_path, args):
             oss_param = parse_parameters(args.oss_param, ",", ":")
             if oss_param is None:
                 raise Exception("Please config oss parameter to store model")
-
+                return False
             oss_param['path'] = args.model_path            
             dump_model_to_oss(oss_param, model)
             logging.info("Dump model into oss place %s", args.model_path)
+        elif type == 'gcp':
+            gcp_param = parse_parameters(args.gcp_param, ','.':')
+            if gcp_param is None:
+                raise Exception('Please config gcp parameter to store model')
+                return False
+            gcp_param['path'] = args.model_path
+            dump_model_to_gcp(gcp_param, model)
+            logging.info('Dump model into gcp place %s', args.model_path)
 
     return True
 
@@ -171,6 +180,14 @@ def read_model(type, model_path, args):
 
         model = read_model_from_oss(oss_param)
         logging.info("read model from oss place %s", model_path)
+    elif type == 'gcp':
+        gcp_param = parse_parameters(args.gcp_param,',',':')
+        if gcp_param is None:
+            raise Exception('Please config gcp to read model')
+            return False
+        gcp_param['path'] = args.model_path
+        model = read_model_from_gcp(args.gcp_param)
+        logging.info('read model from gcp place %s', model_path)
 
     return model
 
