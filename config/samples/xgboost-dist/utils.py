@@ -207,7 +207,7 @@ def dump_model_to_oss(oss_parameters, booster):
                                       'feature_importance.json')
 
     oss_path = oss_parameters['path']
-    logger.info('---- export model ----')
+    logger.info('---- export model to OSS----')
     booster.save_model(model_fname)
     booster.dump_model(text_model_fname)  # format output model
     fscore_dict = booster.get_fscore()
@@ -226,6 +226,7 @@ def dump_model_to_oss(oss_parameters, booster):
         upload_oss(oss_parameters, model_fname, aux_path)
         upload_oss(oss_parameters, text_model_fname, aux_path)
         upload_oss(oss_parameters, feature_importance, aux_path)
+        logger.info('---- model uploaded to OSS successfully!----')
     else:
         raise Exception("fail to generate model")
         return False
@@ -238,7 +239,7 @@ def dump_model_to_gcp(gcp_parameter,booster):
                                       'feature_importance.json')
 
     gcp_path = gcp_parameters['path']
-    logger.info('---- export model ----')
+    logger.info('---- export model to GCP----')
     booster.save_model(model_fname)
     booster.dump_model(text_model_fname)  
     fscore_dict = booster.get_fscore()
@@ -257,6 +258,7 @@ def dump_model_to_gcp(gcp_parameter,booster):
         upload_gcp(gcp_parameters, model_fname, aux_path)
         upload_gcp(gcp_parameters, text_model_fname, aux_path)
         upload_gcp(gcp_parameters, feature_importance, aux_path)
+        logger.info('---- model uploaded to GCP successfully!----')
     else:
         raise Exception("fail to generate model")
         return False
