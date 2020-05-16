@@ -16,6 +16,7 @@ import xgboost as xgb
 import os
 import tempfile
 from googel.cloud import storage
+from oauth2client.service_account import ServiceAccountCredentials
 import oss2
 import json
 import pandas as pd
@@ -230,6 +231,37 @@ def dump_model_to_oss(oss_parameters, booster):
         return False
 
     return True
+def dump_model_to_gcp(gcp_parameter,booster):
+    model_fname = os.path.join(tempfile.mkdtemp(), 'model')
+    text_model_fname = os.path.join(tempfile.mkdtemp(), 'model.text')
+    feature_importance = os.path.join(tempfile.mkdtemp(),
+                                      'feature_importance.json')
+
+    gcp_path = gcp_parameters['path']
+    logger.info('---- export model ----')
+    booster.save_model(model_fname)
+    booster.dump_model(text_model_fname)  
+    fscore_dict = booster.get_fscore()
+    with open(feature_importance, 'w') as file:
+        file.write(json.dumps(fscore_dict))
+        logger.info('---- chief dump model successfully!')
+
+    if os.path.exists(model_fname):
+        logger.info('---- Upload Model start...')
+
+        while gcp_path[-1] == '/':
+            gcp_path = gcp_path[:-1]
+
+        upload_gcp(gcp_parameters, model_fname, gcp_path)
+        aux_path = gcp_path + '_dir/'
+        upload_gcp(gcp_parameters, model_fname, aux_path)
+        upload_gcp(gcp_parameters, text_model_fname, aux_path)
+        upload_gcp(gcp_parameters, feature_importance, aux_path)
+    else:
+        raise Exception("fail to generate model")
+        return False
+
+    return True
 
 
 def upload_oss(kw, local_file, oss_path):
@@ -254,6 +286,23 @@ def upload_oss(kw, local_file, oss_path):
     except Exception():
         raise ValueError('upload %s to %s failed' %
                          (os.path.abspath(local_file), oss_path))
+def upload_gcp(kw, local_file, gcp_path):
+    if gcp_path[-1] == '/':
+        gcp_path = '%s%s' % (gcp_path, os.path.basename(local_file))
+     credentials_dict = {
+         'type': kw['type'],
+         'client_id': kw['client_id'],
+         'client_email': kw['client_email']
+         'private_key_id':kw['private_key_id']
+         'private_key': kw['private_key']
+     }
+    credentials=ServiceAccountCredentials.from_json_keyfile_dict(credential_dict)
+    client = storage.Client(credentials=credentials)
+    bucket=storage.get_bucket(kw['access_bucket'])
+    blob=bucket.blob(gcp_path)
+    blob.upload_from_filename(local_file)
+         
+    
 
 
 def read_model_from_oss(kw):
@@ -280,7 +329,27 @@ def read_model_from_oss(kw):
     bst.load_model(temp_model_fname)
 
     return bst
-
+def read_model_from_gcp(kw):
+     credentials_dict = {
+         'type': kw['type'],
+         'client_id': kw['client_id'],
+         'client_email': kw['client_email']
+         'private_key_id':kw['private_key_id']
+         'private_key': kw['private_key']
+     }
+    credentials=ServiceAccountCredentials.from_json_keyfile_dict(credential_dict)
+    client = storage.Client(credentials=credentials)
+    bucket=storage.get_bucket(kw['access_bucket'])
+    gcp_path = kw["path"]
+    blob = bucket.blob(gcp_path)
+    temp_model_fname = os.path.join(tempfile.mkdtemp(), 'local_model')
+    try:
+        blob.download_to_filename(temp_model_fname)
+        logger.info("success to load model from gcp %s", gcp_path)
+    except Exception as e:
+        logging.error("fail to load model: " + e)
+        raise Exception("fail to load model from gcp %s", gcp_path)
+    
 
 def parse_parameters(input, splitter_between, splitter_in):
     """
