@@ -45,6 +45,7 @@ The oss parameter includes the account information such as access_id, access_key
 For Eg:
 --oss_param=endpoint:http://oss-ap-south-1.aliyuncs.com,access_id:XXXXXXXXXXX,access_key:XXXXXXXXXXXXXXXXXXX,access_bucket:XXXXXX
 Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction.
+
 **Configure GCP parameter**
 For training jobs in GCP , you could configure xgboostjob_v1alpha1_iris_train.yaml and xgboostjob_v1alpha1_iris_predict.yaml
 Note, we use [GCP](https://cloud.google.com/) to store the trained model,
