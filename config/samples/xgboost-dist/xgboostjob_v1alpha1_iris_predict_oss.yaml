@@ -21,8 +21,8 @@ spec:
             args:
               - --job_type=Predict
               - --model_path=autoAI/xgb-opt/2
-              - --model_storage_type=gcp
-              - --gcp_param=unknown
+              - --model_storage_type=oss
+              - --oss_param=unknown
     Worker:
       replicas: 2
       restartPolicy: ExitCode
@@ -40,7 +40,7 @@ spec:
             args:
              - --job_type=Predict
              - --model_path=autoAI/xgb-opt/2
-             - --model_storage_type=gcp
-             - --gcp_param=unknown
+             - --model_storage_type=oss
+             - --oss_param=unknown
 
 
