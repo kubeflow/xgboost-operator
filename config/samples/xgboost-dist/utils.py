@@ -147,7 +147,7 @@ def dump_model(model, type, model_path, args):
             dump_model_to_oss(oss_param, model)
             logging.info("Dump model into oss place %s", args.model_path)
         elif type == 'gcp':
-            gcp_param = parse_parameters(args.gcp_param, ','.':')
+            gcp_param = parse_parameters(args.gcp_param, ',',':')
             if gcp_param is None:
                 raise Exception('Please config gcp parameter to store model')
                 return False
