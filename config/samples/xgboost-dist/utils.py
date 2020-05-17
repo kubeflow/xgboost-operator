@@ -232,7 +232,7 @@ def dump_model_to_oss(oss_parameters, booster):
         return False
 
     return True
-def dump_model_to_gcp(gcp_parameter,booster):
+def dump_model_to_gcp(gcp_parameters,booster):
     model_fname = os.path.join(tempfile.mkdtemp(), 'model')
     text_model_fname = os.path.join(tempfile.mkdtemp(), 'model.text')
     feature_importance = os.path.join(tempfile.mkdtemp(),
