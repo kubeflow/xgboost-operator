@@ -291,13 +291,11 @@ def upload_oss(kw, local_file, oss_path):
 def upload_gcp(kw, local_file, gcp_path):
     if gcp_path[-1] == '/':
         gcp_path = '%s%s' % (gcp_path, os.path.basename(local_file))
-     credentials_dict = {
-         'type': kw['type'],
-         'client_id': kw['client_id'],
-         'client_email': kw['client_email']
-         'private_key_id':kw['private_key_id']
-         'private_key': kw['private_key']
-     }
+     credentials_dict = {'type': kw['type'],
+                         'client_id': kw['client_id'],
+                         'client_email': kw['client_email'],
+                         'private_key_id':kw['private_key_id'],
+                         'private_key': kw['private_key'], }
     credentials=ServiceAccountCredentials.from_json_keyfile_dict(credential_dict)
     client = storage.Client(credentials=credentials)
     bucket=storage.get_bucket(kw['access_bucket'])
