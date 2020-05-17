@@ -299,7 +299,7 @@ def upload_gcp(kw, local_file, gcp_path):
          'private_key': kw['private_key'],
      }
     credentials=ServiceAccountCredentials.from_json_keyfile_dict(
-        credential_dict
+        credentials_dict
     )
     client = storage.Client(credentials=credentials)
     bucket=storage.get_bucket(kw['access_bucket'])
@@ -342,7 +342,7 @@ def read_model_from_gcp(kw):
          'private_key': kw['private_key'],
      }
     credentials=ServiceAccountCredentials.from_json_keyfile_dict(
-        credential_dict
+        credentials_dict
     )
     client = storage.Client(credentials=credentials)
     bucket=storage.get_bucket(kw['access_bucket'])
