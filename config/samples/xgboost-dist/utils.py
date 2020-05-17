@@ -292,7 +292,7 @@ def upload_gcp(kw, local_file, gcp_path):
     if gcp_path[-1] == '/':
         gcp_path = '%s%s' % (gcp_path, os.path.basename(local_file))
     credentials_dict = {
-         'type': kw['type'],
+         'type': 'service_account',
          'client_id': kw['client_id'],
          'client_email': kw['client_email'],
          'private_key_id':kw['private_key_id'],
@@ -335,7 +335,7 @@ def read_model_from_oss(kw):
     return bst
 def read_model_from_gcp(kw):
     credentials_dict = {
-         'type': kw['type'],
+         'type': 'service_account',
          'client_id': kw['client_id'],
          'client_email': kw['client_email'],
          'private_key_id':kw['private_key_id'],
