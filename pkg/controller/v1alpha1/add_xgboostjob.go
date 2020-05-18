@@ -13,10 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package v1alpha1
 
 import (
-	"github.com/kubeflow/xgboost-operator/pkg/controller/xgboostjob"
+	"github.com/kubeflow/xgboost-operator/pkg/controller/v1alpha1/xgboostjob"
 )
 
 func init() {

@@ -13,13 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package apis
-
-import (
-	"github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1alpha1"
-)
-
-func init() {
-	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes, v1alpha1.SchemeBuilder.AddToScheme)
-}
+// Package v1 contains API Schema definitions for the xgboostjob v1 API group
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen=package,register
+// +k8s:conversion-gen=github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob
+// +k8s:defaulter-gen=TypeMeta
+// +groupName=xgboostjob.kubeflow.org
+package v1
