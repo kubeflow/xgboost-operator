@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/kubeflow/xgboost-operator/pkg/apis"
-	"github.com/kubeflow/xgboost-operator/pkg/controller"
+	controller "github.com/kubeflow/xgboost-operator/pkg/controller/v1"
 	"github.com/kubeflow/xgboost-operator/pkg/webhook"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
