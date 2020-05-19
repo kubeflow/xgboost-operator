@@ -14,9 +14,8 @@ limitations under the License.
 */
 
 package xgboostjob
-
 import (
-	common "github.com/kubeflow/common/job_controller/api/v1"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,11 +25,11 @@ import (
 func NewXGBoostJobWithMaster(worker int) *v1xgboost.XGBoostJob {
 	job := NewXGoostJob(worker)
 	master := int32(1)
-	masterReplicaSpec := &common.ReplicaSpec{
+	masterReplicaSpec := &commonv1.ReplicaSpec{
 		Replicas: &master,
 		Template: NewXGBoostReplicaSpecTemplate(),
 	}
-	job.Spec.XGBReplicaSpecs[common.ReplicaType(v1xgboost.XGBoostReplicaTypeMaster)] = masterReplicaSpec
+	job.Spec.XGBReplicaSpecs[commonv1.ReplicaType(v1xgboost.XGBoostReplicaTypeMaster)] = masterReplicaSpec
 	return job
 }
 
@@ -45,17 +44,17 @@ func NewXGoostJob(worker int) *v1xgboost.XGBoostJob {
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: v1xgboost.XGBoostJobSpec{
-			XGBReplicaSpecs: make(map[common.ReplicaType]*common.ReplicaSpec),
+			XGBReplicaSpecs: make(map[commonv1.ReplicaType]*commonv1.ReplicaSpec),
 		},
 	}
 
 	if worker > 0 {
 		worker := int32(worker)
-		workerReplicaSpec := &common.ReplicaSpec{
+		workerReplicaSpec := &commonv1.ReplicaSpec{
 			Replicas: &worker,
 			Template: NewXGBoostReplicaSpecTemplate(),
 		}
-		job.Spec.XGBReplicaSpecs[common.ReplicaType(v1xgboost.XGBoostReplicaTypeWorker)] = workerReplicaSpec
+		job.Spec.XGBReplicaSpecs[commonv1.ReplicaType(v1xgboost.XGBoostReplicaTypeWorker)] = workerReplicaSpec
 	}
 
 	return job
@@ -121,7 +120,7 @@ func TestClusterSpec(t *testing.T) {
 		},
 	}
 	for _, c := range testCase {
-		demoTemplateSpec := c.job.Spec.XGBReplicaSpecs[common.ReplicaType(c.rt)].Template
+		demoTemplateSpec := c.job.Spec.XGBReplicaSpecs[commonv1.ReplicaType(c.rt)].Template
 		if err := SetPodEnv(c.job, &demoTemplateSpec, string(c.rt), c.index); err != nil {
 			t.Errorf("Failed to set cluster spec: %v", err)
 		}

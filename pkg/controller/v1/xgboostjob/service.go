@@ -18,61 +18,10 @@ package xgboostjob
 import (
 	"context"
 	"fmt"
-	"github.com/kubeflow/common/job_controller"
-	commonutil "github.com/kubeflow/common/util"
-	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
-	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-// CreateService creates the service
-func (r *ReconcileXGBoostJob) CreateService(job interface{}, service *corev1.Service) error {
-	xgboostjob, ok := job.(*v1xgboost.XGBoostJob)
-	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
-	}
-
-	logrus.Info("Creating service ", " Controller name ", xgboostjob.GetName(), " Service name ", service.Namespace+"/"+service.Name)
-
-	//service, err := r.xgbJobController.KubeClientSet.CoreV1().Services(xgboostjob.Namespace).Create(service)
-	err := r.Create(context.Background(), service)
-
-	if err != nil {
-		logrus.Warnf("Create service error %s", xgboostjob.Name)
-	}
-
-	return err
-}
-
-// DeleteService deletes the service
-func (r *ReconcileXGBoostJob) DeleteService(job interface{}, name string, namespace string) error {
-	xgboostjob, ok := job.(*v1xgboost.XGBoostJob)
-	if !ok {
-		return fmt.Errorf("%+v is not a type of XGBoostJob", xgboostjob)
-	}
-
-	service := &corev1.Service{ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name}}
-
-	logrus.Info("Deleting service ", " Controller name ", xgboostjob.GetName(), " Service name ", service.Namespace+"/"+service.Name)
-
-	if err := r.Delete(context.Background(), service); err != nil {
-		if commonutil.IsSucceeded(xgboostjob.Status.JobStatus) {
-			r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeleteServiceReason, "Deleted service: %v", name)
-			return nil
-		}
-
-		r.recorder.Eventf(xgboostjob, corev1.EventTypeWarning, job_controller.FailedDeleteServiceReason, "Error deleting: %v", err)
-		return fmt.Errorf("unable to delete service: %v", err)
-	}
-
-	r.recorder.Eventf(xgboostjob, corev1.EventTypeNormal, job_controller.SuccessfulDeleteServiceReason, "Deleted service: %v", name)
-
-	return nil
-
-}
 
 // GetServicesForJob returns the services managed by the job. This can be achieved by selecting services using label key "job-name"
 // i.e. all services created by the job will come with label "job-name" = <this_job_name>
@@ -84,7 +33,7 @@ func (r *ReconcileXGBoostJob) GetServicesForJob(obj interface{}) ([]*corev1.Serv
 	// List all pods to include those that don't match the selector anymore
 	// but have a ControllerRef pointing to this controller.
 	serviceList := &corev1.ServiceList{}
-	err = r.List(context.Background(), serviceList, client.MatchingLabels(r.xgbJobController.GenLabels(job.GetName())))
+	err = r.List(context.Background(), serviceList, client.MatchingLabels(r.GenLabels(job.GetName())))
 	if err != nil {
 		return nil, err
 	}

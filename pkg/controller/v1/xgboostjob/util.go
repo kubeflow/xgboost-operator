@@ -22,13 +22,13 @@ import (
 	"strings"
 	"time"
 
-	common "github.com/kubeflow/common/job_controller/api/v1"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
-	kubebatchclient "github.com/kubernetes-sigs/kube-batch/pkg/client/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeclientset "k8s.io/client-go/kubernetes"
 	restclientset "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	volcanoclient "volcano.sh/volcano/pkg/client/clientset/versioned"
 )
 
 // getClientReaderFromClient try to extract client reader from client, client
@@ -61,7 +61,7 @@ func computeMasterAddr(jobName, rtype, index string) string {
 
 // GetPortFromXGBoostJob gets the port of xgboost container.
 func GetPortFromXGBoostJob(job *v1xgboost.XGBoostJob, rtype v1xgboost.XGBoostJobReplicaType) (int32, error) {
-	containers := job.Spec.XGBReplicaSpecs[common.ReplicaType(rtype)].Template.Spec.Containers
+	containers := job.Spec.XGBReplicaSpecs[commonv1.ReplicaType(rtype)].Template.Spec.Containers
 	for _, container := range containers {
 		if container.Name == v1xgboost.DefaultContainerName {
 			ports := container.Ports
@@ -92,8 +92,7 @@ func computeTotalReplicas(obj metav1.Object) int32 {
 	return jobReplicas
 }
 
-func createClientSets(config *restclientset.Config) (kubeclientset.Interface, kubeclientset.Interface, kubebatchclient.Interface, error) {
-
+func createClientSets(config *restclientset.Config) (kubeclientset.Interface, kubeclientset.Interface, volcanoclient.Interface, error) {
 	if config == nil {
 		println("there is an error for the input config")
 		return nil, nil, nil, nil
@@ -109,12 +108,12 @@ func createClientSets(config *restclientset.Config) (kubeclientset.Interface, ku
 		return nil, nil, nil, err
 	}
 
-	kubeBatchClientSet, err := kubebatchclient.NewForConfig(restclientset.AddUserAgent(config, "kube-batch"))
+	volcanoClientSet, err := volcanoclient.NewForConfig(restclientset.AddUserAgent(config, "volcano"))
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	return kubeClientSet, leaderElectionClientSet, kubeBatchClientSet, nil
+	return kubeClientSet, leaderElectionClientSet, volcanoClientSet, nil
 }
 
 func homeDir() string {
@@ -124,7 +123,7 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
-func isGangSchedulerSet(replicas map[common.ReplicaType]*common.ReplicaSpec) bool {
+func isGangSchedulerSet(replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec) bool {
 	for _, spec := range replicas {
 		if spec.Template.Spec.SchedulerName != "" && spec.Template.Spec.SchedulerName == gangSchedulerName {
 			return true

@@ -15,12 +15,13 @@ package xgboostjob
 import (
 	"context"
 	"flag"
-	"path/filepath"
-
-	"github.com/kubeflow/common/job_controller"
-	"github.com/kubeflow/common/job_controller/api/v1"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
+	"github.com/kubeflow/common/pkg/controller.v1/common"
+	"github.com/kubeflow/common/pkg/controller.v1/control"
+	"github.com/kubeflow/common/pkg/controller.v1/expectation"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
 	corev1 "k8s.io/api/core/v1"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -30,7 +31,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
-	k8scontroller "k8s.io/kubernetes/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -46,12 +46,11 @@ const (
 	labelXGBoostJobRole = "xgboostjob-job-role"
 	// gang scheduler name.
 	gangSchedulerName = "kube-batch"
-	// default cleanpod policy
 )
 
 var (
 	defaultTTLseconds     = int32(100)
-	defaultCleanPodPolicy = v1.CleanPodPolicyNone
+	defaultCleanPodPolicy = commonv1.CleanPodPolicyNone
 )
 var log = logf.Log.WithName("controller")
 
@@ -92,12 +91,12 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	if mode == "local" {
 		log.Info("Running controller in local mode, using kubeconfig file")
 		/// TODO, add the master url and kubeconfigpath with user input
-		kcfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+		config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 		if err != nil {
 			log.Info("Error building kubeconfig: %s", err.Error())
 			panic(err.Error())
 		}
-		_ = kcfg
+		kcfg = config
 	} else if mode == "in-cluster" {
 		log.Info("Running controller in in-cluster mode")
 		/// TODO, add the master url and kubeconfigpath with user input
@@ -113,11 +112,12 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	}
 
 	// Create clients.
-	kubeClientSet, _, kubeBatchClientSet, err := createClientSets(kcfg)
+	kubeClientSet, _, volcanoClientSet, err := createClientSets(kcfg)
 	if err != nil {
 		log.Info("Error building kubeclientset: %s", err.Error())
 	}
 
+	// Create Informer factory
 	xgboostjob := &v1xgboost.XGBoostJob{}
 
 	gangScheduling := isGangSchedulerSet(xgboostjob.Spec.XGBReplicaSpecs)
@@ -125,14 +125,16 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	log.Info("gang scheduling is set: ", "gangscheduling", gangScheduling)
 
 	// Initialize common job controller with components we only need.
-	r.xgbJobController = job_controller.JobController{
-		Controller:         r,
-		Expectations:       k8scontroller.NewControllerExpectations(),
-		Config:             v1.JobControllerConfiguration{EnableGangScheduling: gangScheduling},
-		WorkQueue:          &FakeWorkQueue{},
-		Recorder:           r.recorder,
-		KubeClientSet:      kubeClientSet,
-		KubeBatchClientSet: kubeBatchClientSet,
+	r.JobController = common.JobController{
+		Controller:       r,
+		Expectations:     expectation.NewControllerExpectations(),
+		Config:           common.JobControllerConfiguration{EnableGangScheduling: gangScheduling},
+		WorkQueue:        &FakeWorkQueue{},
+		Recorder:         r.recorder,
+		KubeClientSet:    kubeClientSet,
+		VolcanoClientSet: volcanoClientSet,
+		PodControl:       control.RealPodControl{KubeClient: kubeClientSet, Recorder: r.recorder},
+		ServiceControl:   control.RealServiceControl{KubeClient: kubeClientSet, Recorder: r.recorder},
 	}
 
 	return r
@@ -183,10 +185,10 @@ var _ reconcile.Reconciler = &ReconcileXGBoostJob{}
 
 // ReconcileXGBoostJob reconciles a XGBoostJob object
 type ReconcileXGBoostJob struct {
+	common.JobController
 	client.Client
-	scheme           *runtime.Scheme
-	xgbJobController job_controller.JobController
-	recorder         record.EventRecorder
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a XGBoostJob object and makes changes based on the state read
@@ -223,7 +225,7 @@ func (r *ReconcileXGBoostJob) Reconcile(request reconcile.Request) (reconcile.Re
 	scheme.Scheme.Default(xgboostjob)
 
 	// Use common to reconcile the job related pod and service
-	err = r.xgbJobController.ReconcileJobs(xgboostjob, xgboostjob.Spec.XGBReplicaSpecs, xgboostjob.Status.JobStatus, &xgboostjob.Spec.RunPolicy)
+	err = r.ReconcileJobs(xgboostjob, xgboostjob.Spec.XGBReplicaSpecs, xgboostjob.Status.JobStatus, &xgboostjob.Spec.RunPolicy)
 
 	if err != nil {
 		logrus.Warnf("Reconcile XGBoost Job error %v", err)
@@ -253,10 +255,6 @@ func (r *ReconcileXGBoostJob) GetDefaultContainerName() string {
 	return v1xgboost.DefaultContainerName
 }
 
-func (r *ReconcileXGBoostJob) GetDefaultContainerPortNumber() int32 {
-	return v1xgboost.DefaultPort
-}
-
 func (r *ReconcileXGBoostJob) GetDefaultContainerPortName() string {
 	return v1xgboost.DefaultContainerPortName
 }
@@ -265,8 +263,8 @@ func (r *ReconcileXGBoostJob) GetJobRoleKey() string {
 	return labelXGBoostJobRole
 }
 
-func (r *ReconcileXGBoostJob) IsMasterRole(replicas map[v1.ReplicaType]*v1.ReplicaSpec,
-	rtype v1.ReplicaType, index int) bool {
+func (r *ReconcileXGBoostJob) IsMasterRole(replicas map[commonv1.ReplicaType]*commonv1.ReplicaSpec,
+	rtype commonv1.ReplicaType, index int) bool {
 	return string(rtype) == string(v1xgboost.XGBoostReplicaTypeMaster)
 }
 
