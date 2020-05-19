@@ -16,7 +16,7 @@ limitations under the License.
 package v1
 
 import (
-	common "github.com/kubeflow/common/job_controller/api/v1"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -27,16 +27,16 @@ import (
 type XGBoostJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	RunPolicy common.RunPolicy `json:",inline"`
+	RunPolicy commonv1.RunPolicy `json:",inline"`
 
-	XGBReplicaSpecs map[common.ReplicaType]*common.ReplicaSpec `json:"xgbReplicaSpecs"`
+	XGBReplicaSpecs map[commonv1.ReplicaType]*commonv1.ReplicaSpec `json:"xgbReplicaSpecs"`
 }
 
 // XGBoostJobStatus defines the observed state of XGBoostJob
 type XGBoostJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	common.JobStatus `json:",inline"`
+	commonv1.JobStatus `json:",inline"`
 }
 
 // +genclient
@@ -62,7 +62,7 @@ type XGBoostJobList struct {
 }
 
 // XGBoostJobReplicaType is the type for XGBoostJobReplica.
-type XGBoostJobReplicaType common.ReplicaType
+type XGBoostJobReplicaType commonv1.ReplicaType
 
 const (
 	// XGBoostReplicaTypeMaster is the type of Master of distributed PyTorch
