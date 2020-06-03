@@ -216,10 +216,6 @@ Events:
 
 # Docker Images
 
-You can use the following Dockerfile to build the images yourself:
+You can use [this Dockerfile](Dockerfile) to build the image yourself:
 
-* [xgboost-operator](https://github.com/kubeflow/xgboost-operator/blob/master/Dockerfile)
-
-For your convenience, you can pull the existing image from the following:
-
-* [GCP-xgboost-operator-images](gcr.io/kubeflow-images-public/xgboost-operator)
+Alternatively, you can pull the existing image from GCP [here](https://gcr.io/kubeflow-images-public/xgboost-operator).
