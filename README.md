@@ -24,7 +24,7 @@ cd manifests/xgboost-job/xgboost-operator
 kubectl create namespace kubeflow
 kustomize build base | kubectl apply -f -
 ```
-
+Note: For windows user you might have invalid path erro when you clone the kubeflow/manifests library, please use WSL instead.
 Note that since Kubernetes v1.14, `kustomize` became a subcommand in `kubectl` so you can also run the following command instead:
 
 ```bash
