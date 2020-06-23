@@ -4,11 +4,12 @@ metadata:
   creationTimestamp: null
   labels:
     controller-tools.k8s.io: "1.0"
-  name: xgboostjobs.xgboostjob.kubeflow.org
+  name: xgboostjobs.kubeflow.org
 spec:
-  group: xgboostjob.kubeflow.org
+  group: kubeflow.org
   names:
     kind: XGBoostJob
+    singular: xgboostjob
     plural: xgboostjobs
   scope: Namespaced
   validation:
