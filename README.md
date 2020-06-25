@@ -66,6 +66,10 @@ make install
 make run 
 ``` 
 If the XGBoost Job operator can be installed into cluster, you can view the logs likes this 
+
+<details>
+<summary>Logs</summary>
+
 ```
 {"level":"info","ts":1589406873.090652,"logger":"entrypoint","msg":"setting up client for manager"}
 {"level":"info","ts":1589406873.0991302,"logger":"entrypoint","msg":"setting up manager"}
@@ -81,7 +85,9 @@ If the XGBoost Job operator can be installed into cluster, you can view the logs
 {"level":"info","ts":1589406874.225247,"logger":"entrypoint","msg":"Starting the Cmd."}
 {"level":"info","ts":1589406874.32791,"logger":"kubebuilder.controller","msg":"Starting Controller","controller":"xgboostjob-controller"}
 {"level":"info","ts":1589406874.430336,"logger":"kubebuilder.controller","msg":"Starting workers","controller":"xgboostjob-controller","worker count":1}
-``` 
+```
+</details>
+
 ## Creating a XGBoost Training/Prediction Job
 
 You can create a XGBoost training or prediction (batch oriented) job by modifying the XGBoostJob config file. 
@@ -111,6 +117,10 @@ You can also monitor the job status.
 ``` 
 
 Here is the sample output when training job is finished. 
+
+<details>
+<summary>XGBoost Job Details</summary>
+
 ```
 Name:         xgboost-dist-iris-test
 Namespace:    default
@@ -213,9 +223,23 @@ Events:
   Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
  ```
 
+</details>
 
-# Docker Images
+## Docker Images
 
 You can use [this Dockerfile](Dockerfile) to build the image yourself:
 
 Alternatively, you can pull the existing image from GCP [here](https://gcr.io/kubeflow-images-public/xgboost-operator).
+
+## Known Issues
+
+XGBoost and `kubeflow/common` use pointer value in map like `map[commonv1.ReplicaType]*commonv1.ReplicaSpec`. However, `controller-gen` in [controller-tools](https://github.com/kubernetes-sigs/controller-tools) doesn't accept pointers as map values in latest version (v0.3.0), in order to generate crds and deepcopy files, we need to build custom `controller-gen`. You can follow steps below. Then `make generate` can work properly. 
+
+```shell
+git clone --branch v0.2.2 git@github.com:kubernetes-sigs/controller-tools.git
+git cherry-pick 71b6e91
+go build -o controller-gen cmd/controller-gen/main.go
+cp controller-gen /usr/local/bin
+```
+
+This can be removed once a newer `controller-gen` released and xgboost can upgrade to corresponding k8s version.
