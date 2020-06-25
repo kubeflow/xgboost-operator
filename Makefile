@@ -26,8 +26,8 @@ deploy: manifests
 	kustomize build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+manifests: controller-gen
+	$(CONTROLLER_GEN) crd rbac:roleName=manager-role paths=./pkg/apis/... output:crd:artifacts:config=config/crds
 
 # Run go fmt against code
 fmt:
@@ -38,11 +38,8 @@ vet:
 	go vet ./pkg/... ./cmd/...
 
 # Generate code
-generate:
-ifndef GOPATH
-	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
-	go generate ./pkg/... ./cmd/...
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./pkg/apis/... ./pkg/controller/..."
 
 # Build the docker image
 docker-build: test
@@ -53,3 +50,14 @@ docker-build: test
 # Push the docker image
 docker-push:
 	docker push ${IMG}
+
+# find or download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	# Please backport https://github.com/kubernetes-sigs/controller-tools/pull/317
+	# and build a customize controller-gen to use
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.2
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
