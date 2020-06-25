@@ -14,6 +14,7 @@ limitations under the License.
 */
 
 package xgboostjob
+
 import (
 	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
