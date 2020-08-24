@@ -108,7 +108,7 @@ kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.
 
 ## Monitor a distributed XGBoost Job 
 
-Once the XGBoost Job is created, you should be able to watch how th related pod and service working. 
+Once the XGBoost Job is created, you should be able to watch how the related pod and service working. 
 Distributed XGBoost job is trained by synchronizing different worker status via tne Rabit of XGBoost.  
 You can also monitor the job status.  
 
