@@ -59,7 +59,7 @@ func convertPodList(list []corev1.Pod) []*corev1.Pod {
 	return ret
 }
 
-// Set the pod env set for XGBoost Rabit Tracker and worker
+// SetPodEnv sets the pod env set for XGBoost Rabit Tracker and worker
 func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
 	xgboostjob, ok := job.(*v1xgboost.XGBoostJob)
 	if !ok {
