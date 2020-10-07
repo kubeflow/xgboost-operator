@@ -87,6 +87,21 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, inde
 
 	totalReplicas := computeTotalReplicas(xgboostjob)
 
+	var workerPort int32
+	var workerAddrs []string
+
+	if totalReplicas > 1 {
+		workerPortTemp, err := GetPortFromXGBoostJob(xgboostjob, v1xgboost.XGBoostReplicaTypeWorker)
+		if err != nil {
+			return err
+		}
+		workerPort = workerPortTemp
+		workerAddrs = make([]string, totalReplicas-1)
+		for i := range workerAddrs {
+			workerAddrs[i] = computeMasterAddr(xgboostjob.Name, strings.ToLower(string(v1xgboost.XGBoostReplicaTypeWorker)), strconv.Itoa(i))
+		}
+	}
+
 	for i := range podTemplate.Spec.Containers {
 		if len(podTemplate.Spec.Containers[i].Env) == 0 {
 			podTemplate.Spec.Containers[i].Env = make([]corev1.EnvVar, 0)
@@ -111,6 +126,16 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, inde
 			Name:  "PYTHONUNBUFFERED",
 			Value: "0",
 		})
+		if totalReplicas > 1 {
+			podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+				Name:  "WORKER_PORT",
+				Value: strconv.Itoa(int(workerPort)),
+			})
+			podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+				Name:  "WORKER_ADDRS",
+				Value: strings.Join(workerAddrs, ","),
+			})
+		}
 	}
 
 	return nil
