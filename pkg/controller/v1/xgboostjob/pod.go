@@ -18,10 +18,11 @@ package xgboostjob
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/api/meta"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
