@@ -11,8 +11,10 @@
 # limitations under the License.
 
 import re
+import socket
 import logging
 import tempfile
+from time import sleep
 from typing import List, Union
 
 logger = logging.getLogger(__name__)
@@ -24,9 +26,41 @@ def generate_machine_list_file(
     logger.info("starting to extract system env")
 
     filename = tempfile.NamedTemporaryFile(delete=False).name
+
+    def _get_ips(
+        master_addr_name,
+        worker_addr_names,
+        max_retries=10,
+        sleep_secs=10,
+        current_retry=0,
+    ):
+        try:
+            worker_addr_ips = []
+            master_addr_ip = socket.gethostbyname(master_addr_name)
+
+            for addr in worker_addr_names.split(","):
+                worker_addr_ips.append(socket.gethostbyname(addr))
+
+        except socket.gaierror as ex:
+            if "Name or service not known" in str(ex) and current_retry < max_retries:
+                sleep(sleep_secs)
+                master_addr_ip, worker_addr_ips = _get_ips(
+                    master_addr_name,
+                    worker_addr_names,
+                    max_retries=max_retries,
+                    sleep_secs=sleep_secs,
+                    current_retry=current_retry + 1,
+                )
+            else:
+                raise ValueError("Couldn't get adress names")
+
+        return master_addr_ip, worker_addr_ips
+
+    master_ip, worker_ips = _get_ips(master_addr, worker_addrs)
+
     with open(filename, "w") as file:
-        print(f"{master_addr} {master_port}", file=file)
-        for addr in worker_addrs.split(","):
+        print(f"{master_ip} {master_port}", file=file)
+        for addr in worker_ips:
             print(f"{addr} {worker_port}", file=file)
 
     return filename
