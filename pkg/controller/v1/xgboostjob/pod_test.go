@@ -16,11 +16,12 @@ limitations under the License.
 package xgboostjob
 
 import (
+	"testing"
+
 	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func NewXGBoostJobWithMaster(worker int) *v1xgboost.XGBoostJob {
@@ -99,25 +100,25 @@ func TestClusterSpec(t *testing.T) {
 			job:                 NewXGBoostJobWithMaster(1),
 			rt:                  v1xgboost.XGBoostReplicaTypeMaster,
 			index:               "1",
-			expectedClusterSpec: map[string]string{"WORLD_SIZE": "2", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0"},
+			expectedClusterSpec: map[string]string{"WORLD_SIZE": "2", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0", "WORKER_PORT": "9999", "WORKER_ADDRS": "test-xgboostjob-worker-0"},
 		},
 		tc{
 			job:                 NewXGBoostJobWithMaster(2),
 			rt:                  v1xgboost.XGBoostReplicaTypeMaster,
 			index:               "0",
-			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "0", "MASTER_ADDR": "test-xgboostjob-master-0"},
+			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "0", "MASTER_ADDR": "test-xgboostjob-master-0", "WORKER_PORT": "9999", "WORKER_ADDRS": "test-xgboostjob-worker-0,test-xgboostjob-worker-1"},
 		},
 		tc{
 			job:                 NewXGBoostJobWithMaster(2),
 			rt:                  v1xgboost.XGBoostReplicaTypeWorker,
 			index:               "0",
-			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0"},
+			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "1", "MASTER_ADDR": "test-xgboostjob-master-0", "WORKER_PORT": "9999", "WORKER_ADDRS": "test-xgboostjob-worker-0,test-xgboostjob-worker-1"},
 		},
 		tc{
 			job:                 NewXGBoostJobWithMaster(2),
 			rt:                  v1xgboost.XGBoostReplicaTypeWorker,
 			index:               "1",
-			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "2", "MASTER_ADDR": "test-xgboostjob-master-0"},
+			expectedClusterSpec: map[string]string{"WORLD_SIZE": "3", "MASTER_PORT": "9999", "RANK": "2", "MASTER_ADDR": "test-xgboostjob-master-0", "WORKER_PORT": "9999", "WORKER_ADDRS": "test-xgboostjob-worker-0,test-xgboostjob-worker-1"},
 		},
 	}
 	for _, c := range testCase {
