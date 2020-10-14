@@ -16,7 +16,6 @@ import argparse
 
 from train import train
 
-# from predict import predict
 from utils import generate_machine_list_file, generate_train_conf_file
 
 
