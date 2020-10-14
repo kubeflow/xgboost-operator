@@ -59,7 +59,9 @@ func convertPodList(list []corev1.Pod) []*corev1.Pod {
 	return ret
 }
 
-// SetPodEnv sets the pod env set for XGBoost Rabit Tracker and worker
+// SetPodEnv sets the pod env set for:
+// - XGBoost Rabit Tracker and worker
+// - LightGBM master and workers
 func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
 	xgboostjob, ok := job.(*v1xgboost.XGBoostJob)
 	if !ok {
@@ -126,6 +128,7 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, inde
 			Name:  "PYTHONUNBUFFERED",
 			Value: "0",
 		})
+		// This variables are used if it is a LightGBM job
 		if totalReplicas > 1 {
 			podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
 				Name:  "WORKER_PORT",
