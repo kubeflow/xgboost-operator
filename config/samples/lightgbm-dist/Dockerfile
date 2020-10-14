@@ -18,7 +18,7 @@ RUN apt-get update && \
     export PATH="$CONDA_DIR/bin:$PATH" && \
     conda config --set always_yes yes --set changeps1 no && \
     # lightgbm
-    conda install -q -y numpy scipy scikit-learn pandas && \
+    conda install -q -y numpy==1.19.1 scipy==1.5.2 scikit-learn==0.23.2 pandas==1.1.3 && \
     git clone --recursive --branch stable --depth 1 https://github.com/Microsoft/LightGBM && \
     mkdir LightGBM/build && \
     cd LightGBM/build && \
