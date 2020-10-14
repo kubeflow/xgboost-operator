@@ -30,11 +30,15 @@ RUN apt-get update && \
     # clean
     apt-get autoremove -y && apt-get clean && \
     conda clean -a -y && \
-    rm -rf /usr/local/src/*
+    rm -rf /usr/local/src/* && \
+    rm -rf /LightGBM
 
 WORKDIR /app
 
-COPY data ./data/.
+# Download the example data
+RUN mkdir data
+ADD https://raw.githubusercontent.com/microsoft/LightGBM/stable/examples/parallel_learning/binary.train data/.
+ADD https://raw.githubusercontent.com/microsoft/LightGBM/stable/examples/parallel_learning/binary.test data/.
 COPY *.py ./
 
 ENTRYPOINT [ "python", "/app/main.py" ]
