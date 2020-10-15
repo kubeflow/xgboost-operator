@@ -18,10 +18,11 @@ package xgboostjob
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/api/meta"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	v1xgboost "github.com/kubeflow/xgboost-operator/pkg/apis/xgboostjob/v1"
@@ -58,7 +59,9 @@ func convertPodList(list []corev1.Pod) []*corev1.Pod {
 	return ret
 }
 
-// Set the pod env set for XGBoost Rabit Tracker and worker
+// SetPodEnv sets the pod env set for:
+// - XGBoost Rabit Tracker and worker
+// - LightGBM master and workers
 func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, index string) error {
 	xgboostjob, ok := job.(*v1xgboost.XGBoostJob)
 	if !ok {
@@ -86,6 +89,21 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, inde
 
 	totalReplicas := computeTotalReplicas(xgboostjob)
 
+	var workerPort int32
+	var workerAddrs []string
+
+	if totalReplicas > 1 {
+		workerPortTemp, err := GetPortFromXGBoostJob(xgboostjob, v1xgboost.XGBoostReplicaTypeWorker)
+		if err != nil {
+			return err
+		}
+		workerPort = workerPortTemp
+		workerAddrs = make([]string, totalReplicas-1)
+		for i := range workerAddrs {
+			workerAddrs[i] = computeMasterAddr(xgboostjob.Name, strings.ToLower(string(v1xgboost.XGBoostReplicaTypeWorker)), strconv.Itoa(i))
+		}
+	}
+
 	for i := range podTemplate.Spec.Containers {
 		if len(podTemplate.Spec.Containers[i].Env) == 0 {
 			podTemplate.Spec.Containers[i].Env = make([]corev1.EnvVar, 0)
@@ -110,6 +128,17 @@ func SetPodEnv(job interface{}, podTemplate *corev1.PodTemplateSpec, rtype, inde
 			Name:  "PYTHONUNBUFFERED",
 			Value: "0",
 		})
+		// This variables are used if it is a LightGBM job
+		if totalReplicas > 1 {
+			podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+				Name:  "WORKER_PORT",
+				Value: strconv.Itoa(int(workerPort)),
+			})
+			podTemplate.Spec.Containers[i].Env = append(podTemplate.Spec.Containers[i].Env, corev1.EnvVar{
+				Name:  "WORKER_ADDRS",
+				Value: strings.Join(workerAddrs, ","),
+			})
+		}
 	}
 
 	return nil
