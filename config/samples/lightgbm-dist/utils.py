@@ -52,7 +52,7 @@ def generate_machine_list_file(
                     current_retry=current_retry + 1,
                 )
             else:
-                raise ValueError("Couldn't get adress names")
+                raise ValueError("Couldn't get address names")
 
         return master_addr_ip, worker_addr_ips
 
