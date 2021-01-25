@@ -1,0 +1,22 @@
+updates:
+- assignees:
+  - johnugeorge
+  - merlintang
+  - richardsliu
+  - terrytangyuan
+  directory: .
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  schedule:
+    interval: daily
+- assignees:
+  - johnugeorge
+  - merlintang
+  - richardsliu
+  - terrytangyuan
+  directory: .
+  open-pull-requests-limit: 10
+  package-ecosystem: gomod
+  schedule:
+    interval: daily
+version: 2
