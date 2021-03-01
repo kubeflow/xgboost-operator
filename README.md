@@ -7,9 +7,9 @@ Incubating project for [XGBoost](https://github.com/dmlc/xgboost) operator. The 
 
 The overall design can be found [here]( https://github.com/kubeflow/community/issues/247).
 
-## Overview 
+## Overview
 This repository contains the specification and implementation of `XGBoostJob` custom resource definition.
- Using this custom resource, users can create and manage XGBoost jobs like other built-in resources in Kubernetes. 
+ Using this custom resource, users can create and manage XGBoost jobs like other built-in resources in Kubernetes.
 ## Prerequisites
 - Kubernetes >= 1.8
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
@@ -19,8 +19,7 @@ This repository contains the specification and implementation of `XGBoostJob` cu
 You can deploy the operator with default settings by running the following commands using [kustomize](https://github.com/kubernetes-sigs/kustomize):
 
 ```bash
-git clone https://github.com/kubeflow/manifests
-cd manifests/xgboost-job/xgboost-operator
+cd manifests/xgboost-operator
 kubectl create namespace kubeflow
 kustomize build base | kubectl apply -f -
 ```
@@ -33,14 +32,14 @@ kubectl kustomize base | kubectl apply -f -
 
 ## Build XGBoost Operator
 
-XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common). 
+XGBoost Operator is developed based on [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [Kubeflow Common](https://github.com/kubeflow/common).
 
 You can follow the [installation guide of Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/running.html) to install XGBoost operator into the Kubernetes cluster.
 
-You can check whether the XGBoostJob custom resource has been installed via: 
+You can check whether the XGBoostJob custom resource has been installed via:
 ```
 kubectl get crd
-``` 
+```
 The output should include xgboostjobs.kubeflow.org like the following:
 ```
 NAME                                  CREATED AT
@@ -56,16 +55,16 @@ cd $GOPATH
 mkdir src/github.com/kubeflow
 cd src/github.com/kubeflow
 
-## clone the code 
+## clone the code
 git clone git@github.com:kubeflow/xgboost-operator.git
 cd xgboost-operator
 
-## build and install xgboost operator  
-make 
-make install 
-make run 
-``` 
-If the XGBoost Job operator can be installed into cluster, you can view the logs likes this 
+## build and install xgboost operator
+make
+make install
+make run
+```
+If the XGBoost Job operator can be installed into cluster, you can view the logs likes this
 
 <details>
 <summary>Logs</summary>
@@ -90,33 +89,33 @@ If the XGBoost Job operator can be installed into cluster, you can view the logs
 
 ## Creating a XGBoost Training/Prediction Job
 
-You can create a XGBoost training or prediction (batch oriented) job by modifying the XGBoostJob config file. 
-See the distributed XGBoost Job training and prediction [example](https://github.com/kubeflow/xgboost-operator/tree/master/config/samples/xgboost-dist).    
-You can change the config file and related python file (i.e., train.py or predict.py) 
-based on your requirement. 
+You can create a XGBoost training or prediction (batch oriented) job by modifying the XGBoostJob config file.
+See the distributed XGBoost Job training and prediction [example](https://github.com/kubeflow/xgboost-operator/tree/master/config/samples/xgboost-dist).
+You can change the config file and related python file (i.e., train.py or predict.py)
+based on your requirement.
 
 Following the job configuration guild in the example, you can deploy a XGBoost Job to start training or prediction like:
-``` 
-## For training job 
+```
+## For training job
 cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
 kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
 
-## For batch prediction job 
+## For batch prediction job
 cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
 kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
-``` 
+```
 
-## Monitor a distributed XGBoost Job 
+## Monitor a distributed XGBoost Job
 
-Once the XGBoost Job is created, you should be able to watch how the related pod and service working. 
-Distributed XGBoost job is trained by synchronizing different worker status via tne Rabit of XGBoost.  
-You can also monitor the job status.  
+Once the XGBoost Job is created, you should be able to watch how the related pod and service working.
+Distributed XGBoost job is trained by synchronizing different worker status via tne Rabit of XGBoost.
+You can also monitor the job status.
 
-``` 
+```
  kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
-``` 
+```
 
-Here is the sample output when training job is finished. 
+Here is the sample output when training job is finished.
 
 <details>
 <summary>XGBoost Job Details</summary>
@@ -233,7 +232,7 @@ Alternatively, you can pull the existing image from GCP [here](https://gcr.io/ku
 
 ## Known Issues
 
-XGBoost and `kubeflow/common` use pointer value in map like `map[commonv1.ReplicaType]*commonv1.ReplicaSpec`. However, `controller-gen` in [controller-tools](https://github.com/kubernetes-sigs/controller-tools) doesn't accept pointers as map values in latest version (v0.3.0), in order to generate crds and deepcopy files, we need to build custom `controller-gen`. You can follow steps below. Then `make generate` can work properly. 
+XGBoost and `kubeflow/common` use pointer value in map like `map[commonv1.ReplicaType]*commonv1.ReplicaSpec`. However, `controller-gen` in [controller-tools](https://github.com/kubernetes-sigs/controller-tools) doesn't accept pointers as map values in latest version (v0.3.0), in order to generate crds and deepcopy files, we need to build custom `controller-gen`. You can follow steps below. Then `make generate` can work properly.
 
 ```shell
 git clone --branch v0.2.2 git@github.com:kubernetes-sigs/controller-tools.git
