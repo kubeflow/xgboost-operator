@@ -100,12 +100,12 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	} else if mode == "in-cluster" {
 		log.Info("Running controller in in-cluster mode")
 		/// TODO, add the master url and kubeconfigpath with user input
-		kcfg, err := rest.InClusterConfig()
+		config, err := rest.InClusterConfig()
 		if err != nil {
 			log.Info("Error getting in-cluster kubeconfig")
 			panic(err.Error())
 		}
-		_ = kcfg
+		kcfg = config
 	} else {
 		log.Info("Given mode is not valid: ", "mode", mode)
 		panic("-mode should be either local or in-cluster")
