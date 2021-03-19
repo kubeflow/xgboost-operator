@@ -19,7 +19,7 @@ This repository contains the specification and implementation of `XGBoostJob` cu
 You can deploy the operator with default settings by running the following commands using [kustomize](https://github.com/kubernetes-sigs/kustomize):
 
 ```bash
-cd manifests/xgboost-operator
+cd manifests
 kubectl create namespace kubeflow
 kustomize build base | kubectl apply -f -
 ```
