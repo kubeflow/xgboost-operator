@@ -42,8 +42,8 @@ kubectl get crd
 ```
 The output should include xgboostjobs.kubeflow.org like the following:
 ```
-NAME                                  CREATED AT
-xgboostjobs.kubeflow.org   2019-06-14T06:49:45Z
+NAME                                                CREATED AT
+xgboostjobs.xgboostjob.kubeflow.org                 2021-03-24T22:03:07Z
 ```
 If it is not included you can add it as follows:
 ```
@@ -97,22 +97,22 @@ based on your requirement.
 Following the job configuration guild in the example, you can deploy a XGBoost Job to start training or prediction like:
 ```
 ## For training job
-cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
-kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_train.yaml
+cat config/samples/xgboost-dist/xgboostjob_v1_iris_train.yaml
+kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1_iris_train.yaml
 
 ## For batch prediction job
-cat config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
-kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1alpha1_iris_predict.yaml
+cat config/samples/xgboost-dist/xgboostjob_v1_iris_predict.yaml
+kubectl create -f  config/samples/xgboost-dist/xgboostjob_v1_iris_predict.yaml
 ```
 
 ## Monitor a distributed XGBoost Job
 
-Once the XGBoost Job is created, you should be able to watch how the related pod and service working.
+Once the XGBoost job is created, you should be able to watch how the related pod and service working.
 Distributed XGBoost job is trained by synchronizing different worker status via tne Rabit of XGBoost.
 You can also monitor the job status.
 
 ```
- kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train
 ```
 
 Here is the sample output when training job is finished.
@@ -121,105 +121,91 @@ Here is the sample output when training job is finished.
 <summary>XGBoost Job Details</summary>
 
 ```
-Name:         xgboost-dist-iris-test
-Namespace:    default
-Labels:       <none>
-Annotations:  <none>
-API Version:  xgboostjob.kubeflow.org/v1alpha1
-Kind:         XGBoostJob
-Metadata:
-  Creation Timestamp:  2019-06-27T01:16:09Z
-  Generation:          9
-  Resource Version:    385834
-  Self Link:           /apis/xgboostjob.kubeflow.org/v1alpha1/namespaces/default/xgboostjobs/xgboost-dist-iris-test
-  UID:                 2565e99a-9879-11e9-bbab-080027dfbfe2
-Spec:
-  Run Policy:
-    Clean Pod Policy:  None
-  Xgb Replica Specs:
+apiVersion: xgboostjob.kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"xgboostjob.kubeflow.org/v1","kind":"XGBoostJob","metadata":{"annotations":{},"name":"xgboost-dist-iris-test-train","namespace":"default"},"spec":{"xgbReplicaSpecs":{"Master":{"replicas":1,"restartPolicy":"Never","template":{"spec":{"containers":[{"args":["--job_type=Train","--xgboost_parameter=objective:multi:softprob,num_class:3","--n_estimators=10","--learning_rate=0.1","--model_path=/tmp/xgboost-model","--model_storage_type=local"],"image":"docker.io/merlintang/xgboost-dist-iris:1.1","imagePullPolicy":"Always","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}},"Worker":{"replicas":2,"restartPolicy":"ExitCode","template":{"spec":{"containers":[{"args":["--job_type=Train","--xgboost_parameter=\"objective:multi:softprob,num_class:3\"","--n_estimators=10","--learning_rate=0.1"],"image":"docker.io/merlintang/xgboost-dist-iris:1.1","imagePullPolicy":"Always","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}}}}}
+  creationTimestamp: "2021-03-24T22:54:39Z"
+  generation: 8
+  name: xgboost-dist-iris-test-train
+  namespace: default
+  resourceVersion: "1060393"
+  selfLink: /apis/xgboostjob.kubeflow.org/v1/namespaces/default/xgboostjobs/xgboost-dist-iris-test-train
+  uid: 386c9851-7ef8-4928-9dba-2da8829bf048
+spec:
+  RunPolicy:
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
     Master:
-      Replicas:        1
-      Restart Policy:  Never
-      Template:
-        Metadata:
-          Creation Timestamp:  <nil>
-        Spec:
-          Containers:
-            Args:
-              --job_type=Train
-              --xgboost_parameter=objective:multi:softprob,num_class:3
-              --n_estimators=10
-              --learning_rate=0.1
-              --model_path=autoAI/xgb-opt/2
-              --model_storage_type=oss
-              --oss_param=unknown
-            Image:              docker.io/merlintang/xgboost-dist-iris:1.1
-            Image Pull Policy:  Always
-            Name:               xgboostjob
-            Ports:
-              Container Port:  9991
-              Name:            xgboostjob-port
-            Resources:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Train
+            - --xgboost_parameter=objective:multi:softprob,num_class:3
+            - --n_estimators=10
+            - --learning_rate=0.1
+            - --model_path=/tmp/xgboost-model
+            - --model_storage_type=local
+            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
     Worker:
-      Replicas:        2
-      Restart Policy:  ExitCode
-      Template:
-        Metadata:
-          Creation Timestamp:  <nil>
-        Spec:
-          Containers:
-            Args:
-              --job_type=Train
-              --xgboost_parameter="objective:multi:softprob,num_class:3"
-              --n_estimators=10
-              --learning_rate=0.1
-              --model_path="/tmp/xgboost_model"
-              --model_storage_type=oss
-            Image:              docker.io/merlintang/xgboost-dist-iris:1.1
-            Image Pull Policy:  Always
-            Name:               xgboostjob
-            Ports:
-              Container Port:  9991
-              Name:            xgboostjob-port
-            Resources:
-Status:
-  Completion Time:  2019-06-27T01:17:04Z
-  Conditions:
-    Last Transition Time:  2019-06-27T01:16:09Z
-    Last Update Time:      2019-06-27T01:16:09Z
-    Message:               xgboostJob xgboost-dist-iris-test is created.
-    Reason:                XGBoostJobCreated
-    Status:                True
-    Type:                  Created
-    Last Transition Time:  2019-06-27T01:16:09Z
-    Last Update Time:      2019-06-27T01:16:09Z
-    Message:               XGBoostJob xgboost-dist-iris-test is running.
-    Reason:                XGBoostJobRunning
-    Status:                False
-    Type:                  Running
-    Last Transition Time:  2019-06-27T01:17:04Z
-    Last Update Time:      2019-06-27T01:17:04Z
-    Message:               XGBoostJob xgboost-dist-iris-test is successfully completed.
-    Reason:                XGBoostJobSucceeded
-    Status:                True
-    Type:                  Succeeded
-  Replica Statuses:
+      replicas: 2
+      restartPolicy: ExitCode
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - --job_type=Train
+            - --xgboost_parameter="objective:multi:softprob,num_class:3"
+            - --n_estimators=10
+            - --learning_rate=0.1
+            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            imagePullPolicy: Always
+            name: xgboostjob
+            ports:
+            - containerPort: 9991
+              name: xgboostjob-port
+            resources: {}
+status:
+  completionTime: "2021-03-24T22:54:58Z"
+  conditions:
+  - lastTransitionTime: "2021-03-24T22:54:39Z"
+    lastUpdateTime: "2021-03-24T22:54:39Z"
+    message: xgboostJob xgboost-dist-iris-test-train is created.
+    reason: XGBoostJobCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2021-03-24T22:54:39Z"
+    lastUpdateTime: "2021-03-24T22:54:39Z"
+    message: XGBoostJob xgboost-dist-iris-test-train is running.
+    reason: XGBoostJobRunning
+    status: "False"
+    type: Running
+  - lastTransitionTime: "2021-03-24T22:54:58Z"
+    lastUpdateTime: "2021-03-24T22:54:58Z"
+    message: XGBoostJob xgboost-dist-iris-test-train is successfully completed.
+    reason: XGBoostJobSucceeded
+    status: "True"
+    type: Succeeded
+  replicaStatuses:
     Master:
-      Succeeded:  1
+      succeeded: 1
     Worker:
-      Succeeded:  2
-Events:
-  Type    Reason                   Age                From                 Message
-  ----    ------                   ----               ----                 -------
-  Normal  SuccessfulCreatePod      102s               xgboostjob-operator  Created pod: xgboost-dist-iris-test-master-0
-  Normal  SuccessfulCreateService  102s               xgboostjob-operator  Created service: xgboost-dist-iris-test-master-0
-  Normal  SuccessfulCreatePod      102s               xgboostjob-operator  Created pod: xgboost-dist-iris-test-worker-1
-  Normal  SuccessfulCreateService  102s               xgboostjob-operator  Created service: xgboost-dist-iris-test-worker-0
-  Normal  SuccessfulCreateService  102s               xgboostjob-operator  Created service: xgboost-dist-iris-test-worker-1
-  Normal  SuccessfulCreatePod      64s                xgboostjob-operator  Created pod: xgboost-dist-iris-test-worker-0
-  Normal  ExitedWithCode           47s (x3 over 49s)  xgboostjob-operator  Pod: default.xgboost-dist-iris-test-worker-1 exited with code 0
-  Normal  ExitedWithCode           47s                xgboostjob-operator  Pod: default.xgboost-dist-iris-test-master-0 exited with code 0
-  Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
+      succeeded: 2
  ```
 
 </details>
@@ -228,7 +214,7 @@ Events:
 
 You can use [this Dockerfile](Dockerfile) to build the image yourself:
 
-Alternatively, you can pull the existing image from GCP [here](https://gcr.io/kubeflow-images-public/xgboost-operator).
+Alternatively, you can pull the existing image from Dockerhub [here](https://hub.docker.com/r/kubeflow/xgboost-operator/tags).
 
 ## Known Issues
 
