@@ -11,14 +11,14 @@ RUN apt-get update && \
     gcc \
     g++ \
     git \
-    wget && \
+    curl && \
     # python environment
-    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
+    curl -sL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o conda.sh && \
+    /bin/bash conda.sh -f -b -p $CONDA_DIR && \
     export PATH="$CONDA_DIR/bin:$PATH" && \
     conda config --set always_yes yes --set changeps1 no && \
     # lightgbm
-    conda install -q -y numpy==1.19.1 scipy==1.5.2 scikit-learn==0.23.2 pandas==1.1.3 && \
+    conda install -q -y numpy scipy scikit-learn pandas && \
     git clone --recursive --branch stable --depth 1 https://github.com/Microsoft/LightGBM && \
     mkdir LightGBM/build && \
     cd LightGBM/build && \
