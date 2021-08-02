@@ -20,7 +20,7 @@ spec:
               - --job_type=Train
               - --boosting_type=gbdt
               - --objective=binary
-              - --metric=bnary_logloss,auc
+              - --metric=binary_logloss,auc
               - --metric_freq=1
               - --is_training_metric=true
               - --max_bin=255
@@ -54,7 +54,7 @@ spec:
               - --job_type=Train
               - --boosting_type=gbdt
               - --objective=binary
-              - --metric=bnary_logloss,auc
+              - --metric=binary_logloss,auc
               - --metric_freq=1
               - --is_training_metric=true
               - --max_bin=255

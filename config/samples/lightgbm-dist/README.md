@@ -29,7 +29,7 @@ kind: XGBoostJob
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"xgboostjob.kubeflow.org/v1","kind":"XGBoostJob","metadata":{"annotations":{},"name":"lightgbm-dist-train-test","namespace":"default"},"spec":{"xgbReplicaSpecs":{"Master":{"replicas":1,"restartPolicy":"Never","template":{"apiVersion":"v1","kind":"Pod","spec":{"containers":[{"args":["--job_type=Train","--boosting_type=gbdt","--objective=binary","--metric=bnary_logloss,auc","--metric_freq=1","--is_training_metric=true","--max_bin=255","--data=data/binary.train","--valid_data=data/binary.test","--num_trees=100","--learning_rate=01","--num_leaves=63","--tree_learner=feature","--feature_fraction=0.8","--bagging_freq=5","--bagging_fraction=0.8","--min_data_in_leaf=50","--min_sum_hessian_in_leaf=50","--is_enable_sparse=true","--use_two_round_loading=false","--is_save_binary_file=false"],"image":"kubeflow/lightgbm-dist-py-test:1.0","imagePullPolicy":"Never","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}},"Worker":{"replicas":2,"restartPolicy":"ExitCode","template":{"apiVersion":"v1","kind":"Pod","spec":{"containers":[{"args":["--job_type=Train","--boosting_type=gbdt","--objective=binary","--metric=bnary_logloss,auc","--metric_freq=1","--is_training_metric=true","--max_bin=255","--data=data/binary.train","--valid_data=data/binary.test","--num_trees=100","--learning_rate=01","--num_leaves=63","--tree_learner=feature","--feature_fraction=0.8","--bagging_freq=5","--bagging_fraction=0.8","--min_data_in_leaf=50","--min_sum_hessian_in_leaf=50","--is_enable_sparse=true","--use_two_round_loading=false","--is_save_binary_file=false"],"image":"kubeflow/lightgbm-dist-py-test:1.0","imagePullPolicy":"Never","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}}}}}
+      {"apiVersion":"xgboostjob.kubeflow.org/v1","kind":"XGBoostJob","metadata":{"annotations":{},"name":"lightgbm-dist-train-test","namespace":"default"},"spec":{"xgbReplicaSpecs":{"Master":{"replicas":1,"restartPolicy":"Never","template":{"apiVersion":"v1","kind":"Pod","spec":{"containers":[{"args":["--job_type=Train","--boosting_type=gbdt","--objective=binary","--metric=binary_logloss,auc","--metric_freq=1","--is_training_metric=true","--max_bin=255","--data=data/binary.train","--valid_data=data/binary.test","--num_trees=100","--learning_rate=01","--num_leaves=63","--tree_learner=feature","--feature_fraction=0.8","--bagging_freq=5","--bagging_fraction=0.8","--min_data_in_leaf=50","--min_sum_hessian_in_leaf=50","--is_enable_sparse=true","--use_two_round_loading=false","--is_save_binary_file=false"],"image":"kubeflow/lightgbm-dist-py-test:1.0","imagePullPolicy":"Never","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}},"Worker":{"replicas":2,"restartPolicy":"ExitCode","template":{"apiVersion":"v1","kind":"Pod","spec":{"containers":[{"args":["--job_type=Train","--boosting_type=gbdt","--objective=binary","--metric=binary_logloss,auc","--metric_freq=1","--is_training_metric=true","--max_bin=255","--data=data/binary.train","--valid_data=data/binary.test","--num_trees=100","--learning_rate=01","--num_leaves=63","--tree_learner=feature","--feature_fraction=0.8","--bagging_freq=5","--bagging_fraction=0.8","--min_data_in_leaf=50","--min_sum_hessian_in_leaf=50","--is_enable_sparse=true","--use_two_round_loading=false","--is_save_binary_file=false"],"image":"kubeflow/lightgbm-dist-py-test:1.0","imagePullPolicy":"Never","name":"xgboostjob","ports":[{"containerPort":9991,"name":"xgboostjob-port"}]}]}}}}}}
   creationTimestamp: "2020-10-14T15:31:23Z"
   generation: 7
   managedFields:
@@ -119,7 +119,7 @@ spec:
             - --job_type=Train
             - --boosting_type=gbdt
             - --objective=binary
-            - --metric=bnary_logloss,auc
+            - --metric=binary_logloss,auc
             - --metric_freq=1
             - --is_training_metric=true
             - --max_bin=255
@@ -156,7 +156,7 @@ spec:
             - --job_type=Train
             - --boosting_type=gbdt
             - --objective=binary
-            - --metric=bnary_logloss,auc
+            - --metric=binary_logloss,auc
             - --metric_freq=1
             - --is_training_metric=true
             - --max_bin=255
