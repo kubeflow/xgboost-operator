@@ -8,6 +8,9 @@ Incubating project for [XGBoost](https://github.com/dmlc/xgboost) operator. The 
 The overall design can be found [here]( https://github.com/kubeflow/community/issues/247).
 
 ## Overview
+
+**Note: This operator has been merged into [Kubeflow Training Operator](https://github.com/kubeflow/training-operator). This repository is not maintained and will be archived soon.**
+
 This repository contains the specification and implementation of `XGBoostJob` custom resource definition.
  Using this custom resource, users can create and manage XGBoost jobs like other built-in resources in Kubernetes.
 ## Prerequisites
