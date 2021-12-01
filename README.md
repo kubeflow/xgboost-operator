@@ -3,13 +3,16 @@
 [![Build Status](https://travis-ci.com/kubeflow/xgboost-operator.svg?branch=master)](https://travis-ci.com/kubeflow/xgboost-operator/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/xgboost-operator)](https://goreportcard.com/report/github.com/kubeflow/xgboost-operator)
 
-Incubating project for [XGBoost](https://github.com/dmlc/xgboost) operator. The XGBoost operator makes it easy to run distributed XGBoost job training and batch prediction on Kubernetes cluster.
 
-The overall design can be found [here]( https://github.com/kubeflow/community/issues/247).
+## :warning: **kubeflow/xgboost-operator is not maintained**
+
+This operator has been merged into [Kubeflow Training Operator](https://github.com/kubeflow/training-operator). This repository is not maintained and has been archived.
 
 ## Overview
 
-**Note: This operator has been merged into [Kubeflow Training Operator](https://github.com/kubeflow/training-operator). This repository is not maintained and will be archived soon.**
+Incubating project for [XGBoost](https://github.com/dmlc/xgboost) operator. The XGBoost operator makes it easy to run distributed XGBoost job training and batch prediction on Kubernetes cluster.
+
+The overall design can be found [here]( https://github.com/kubeflow/community/issues/247).
 
 This repository contains the specification and implementation of `XGBoostJob` custom resource definition.
  Using this custom resource, users can create and manage XGBoost jobs like other built-in resources in Kubernetes.
