@@ -1,7 +1,7 @@
 apiVersion: "xgboostjob.kubeflow.org/v1alpha1"
 kind: "XGBoostJob"
 metadata:
-  name: "xgboost-dist-iris-test-train-local"
+  name: "xgboost-dist-iris-test-train-oss"
 spec:
   xgbReplicaSpecs:
     Master:
@@ -11,16 +11,9 @@ spec:
         apiVersion: v1
         kind: Pod
         spec:
-          volumes:
-          - name: task-pv-storage
-            persistentVolumeClaim:
-              claimName: xgboostlocal
           containers:
           - name: xgboostjob
             image: docker.io/xfate123/xgboost-dist-iris:1.1
-            volumeMounts:
-              - name: task-pv-storage
-                mountPath: /tmp/xgboost_model
             ports:
             - containerPort: 9991
               name: xgboostjob-port
@@ -30,8 +23,9 @@ spec:
               - --xgboost_parameter=objective:multi:softprob,num_class:3
               - --n_estimators=10
               - --learning_rate=0.1
-              - --model_path=/tmp/xgboost_model/2
-              - --model_storage_type=local
+              - --model_path=autoAI/xgb-opt/2
+              - --model_storage_type=oss
+              - --oss_param=unknown
     Worker:
       replicas: 2
       restartPolicy: ExitCode
@@ -39,16 +33,9 @@ spec:
         apiVersion: v1
         kind: Pod
         spec:
-          volumes:
-          - name: task-pv-storage
-            persistentVolumeClaim:
-              claimName: xgboostlocal
           containers:
           - name: xgboostjob
             image: docker.io/xfate123/xgboost-dist-iris:1.1
-            volumeMounts:
-              - name: task-pv-storage
-                mountPath: /tmp/xgboost_model
             ports:
             - containerPort: 9991
               name: xgboostjob-port
@@ -58,5 +45,5 @@ spec:
               - --xgboost_parameter="objective:multi:softprob,num_class:3"
               - --n_estimators=10
               - --learning_rate=0.1
-              - --model_path=/tmp/xgboost_model/2
-              - --model_storage_type=local
+
+

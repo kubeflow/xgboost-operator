@@ -1,7 +1,7 @@
 apiVersion: "xgboostjob.kubeflow.org/v1alpha1"
 kind: "XGBoostJob"
 metadata:
-  name: "xgboost-dist-iris-test-predict"
+  name: "xgboost-dist-iris-test-train-gcp"
 spec:
   xgbReplicaSpecs:
     Master:
@@ -13,16 +13,19 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            image: docker.io/xfate123/xgboost-dist-iris:1.1
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
             args:
-              - --job_type=Predict
+              - --job_type=Train
+              - --xgboost_parameter=objective:multi:softprob,num_class:3
+              - --n_estimators=10
+              - --learning_rate=0.1
               - --model_path=autoAI/xgb-opt/2
-              - --model_storage_type=oss
-              - --oss_param=unknown
+              - --model_storage_type=gcp
+              - --gcp_param=unknown
     Worker:
       replicas: 2
       restartPolicy: ExitCode
@@ -32,15 +35,13 @@ spec:
         spec:
           containers:
           - name: xgboostjob
-            image: docker.io/merlintang/xgboost-dist-iris:1.1
+            image: docker.io/xfate123/xgboost-dist-iris:1.1
             ports:
             - containerPort: 9991
               name: xgboostjob-port
             imagePullPolicy: Always
             args:
-             - --job_type=Predict
-             - --model_path=autoAI/xgb-opt/2
-             - --model_storage_type=oss
-             - --oss_param=unknown
-
-
+              - --job_type=Train
+              - --xgboost_parameter="objective:multi:softprob,num_class:3"
+              - --n_estimators=10
+              - --learning_rate=0.1

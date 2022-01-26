@@ -15,6 +15,8 @@ import joblib
 import xgboost as xgb
 import os
 import tempfile
+from googel.cloud import storage
+from oauth2client.service_account import ServiceAccountCredentials
 import oss2
 import json
 import pandas as pd
@@ -59,7 +61,7 @@ def read_train_data(rank, num_workers, path):
     y = iris.target
 
     start, end = get_range_data(len(x), rank, num_workers)
-    x = x[start:end, :]
+    x = x[start:end]
     y = y[start:end]
 
     x = pd.DataFrame(x)
@@ -87,7 +89,7 @@ def read_predict_data(rank, num_workers, path):
     y = iris.target
 
     start, end = get_range_data(len(x), rank, num_workers)
-    x = x[start:end, :]
+    x = x[start:end]
     y = y[start:end]
     x = pd.DataFrame(x)
     y = pd.DataFrame(y)
@@ -113,7 +115,7 @@ def get_range_data(num_row, rank, num_workers):
     x_start = rank * num_per_partition
     x_end = (rank + 1) * num_per_partition
 
-    if x_end > num_row:
+    if x_end > num_row or (rank==num_workers-1 and x_end< num_row):
         x_end = num_row
 
     return x_start, x_end
@@ -140,10 +142,18 @@ def dump_model(model, type, model_path, args):
             oss_param = parse_parameters(args.oss_param, ",", ":")
             if oss_param is None:
                 raise Exception("Please config oss parameter to store model")
-
+                return False
             oss_param['path'] = args.model_path            
             dump_model_to_oss(oss_param, model)
             logging.info("Dump model into oss place %s", args.model_path)
+        elif type == 'gcp':
+            gcp_param = parse_parameters(args.gcp_param, ',',':')
+            if gcp_param is None:
+                raise Exception('Please config gcp parameter to store model')
+                return False
+            gcp_param['path'] = args.model_path
+            dump_model_to_gcp(gcp_param, model)
+            logging.info('Dump model into gcp place %s', args.model_path)
 
     return True
 
@@ -171,6 +181,14 @@ def read_model(type, model_path, args):
 
         model = read_model_from_oss(oss_param)
         logging.info("read model from oss place %s", model_path)
+    elif type == 'gcp':
+        gcp_param = parse_parameters(args.gcp_param,',',':')
+        if gcp_param is None:
+            raise Exception('Please config gcp to read model')
+            return False
+        gcp_param['path'] = args.model_path
+        model = read_model_from_gcp(args.gcp_param)
+        logging.info('read model from gcp place %s', model_path)
 
     return model
 
@@ -189,7 +207,7 @@ def dump_model_to_oss(oss_parameters, booster):
                                       'feature_importance.json')
 
     oss_path = oss_parameters['path']
-    logger.info('---- export model ----')
+    logger.info('---- export model to OSS----')
     booster.save_model(model_fname)
     booster.dump_model(text_model_fname)  # format output model
     fscore_dict = booster.get_fscore()
@@ -208,6 +226,39 @@ def dump_model_to_oss(oss_parameters, booster):
         upload_oss(oss_parameters, model_fname, aux_path)
         upload_oss(oss_parameters, text_model_fname, aux_path)
         upload_oss(oss_parameters, feature_importance, aux_path)
+        logger.info('---- model uploaded to OSS successfully!----')
+    else:
+        raise Exception("fail to generate model")
+        return False
+
+    return True
+def dump_model_to_gcp(gcp_parameters,booster):
+    model_fname = os.path.join(tempfile.mkdtemp(), 'model')
+    text_model_fname = os.path.join(tempfile.mkdtemp(), 'model.text')
+    feature_importance = os.path.join(tempfile.mkdtemp(),
+                                      'feature_importance.json')
+
+    gcp_path = gcp_parameters['path']
+    logger.info('---- export model to GCP----')
+    booster.save_model(model_fname)
+    booster.dump_model(text_model_fname)  
+    fscore_dict = booster.get_fscore()
+    with open(feature_importance, 'w') as file:
+        file.write(json.dumps(fscore_dict))
+        logger.info('---- chief dump model successfully!')
+
+    if os.path.exists(model_fname):
+        logger.info('---- Upload Model start...')
+
+        while gcp_path[-1] == '/':
+            gcp_path = gcp_path[:-1]
+
+        upload_gcp(gcp_parameters, model_fname, gcp_path)
+        aux_path = gcp_path + '_dir/'
+        upload_gcp(gcp_parameters, model_fname, aux_path)
+        upload_gcp(gcp_parameters, text_model_fname, aux_path)
+        upload_gcp(gcp_parameters, feature_importance, aux_path)
+        logger.info('---- model uploaded to GCP successfully!----')
     else:
         raise Exception("fail to generate model")
         return False
@@ -237,6 +288,25 @@ def upload_oss(kw, local_file, oss_path):
     except Exception():
         raise ValueError('upload %s to %s failed' %
                          (os.path.abspath(local_file), oss_path))
+def upload_gcp(kw, local_file, gcp_path):
+    if gcp_path[-1] == '/':
+        gcp_path = '%s%s' % (gcp_path, os.path.basename(local_file))
+    credentials_dict = {
+         'type': 'service_account',
+         'client_id': kw['client_id'],
+         'client_email': kw['client_email'],
+         'private_key_id':kw['private_key_id'],
+         'private_key': kw['private_key'],
+     }
+    credentials=ServiceAccountCredentials.from_json_keyfile_dict(
+        credentials_dict
+    )
+    client = storage.Client(credentials=credentials)
+    bucket=storage.get_bucket(kw['access_bucket'])
+    blob=bucket.blob(gcp_path)
+    blob.upload_from_filename(local_file)
+         
+    
 
 
 def read_model_from_oss(kw):
@@ -263,7 +333,29 @@ def read_model_from_oss(kw):
     bst.load_model(temp_model_fname)
 
     return bst
-
+def read_model_from_gcp(kw):
+    credentials_dict = {
+         'type': 'service_account',
+         'client_id': kw['client_id'],
+         'client_email': kw['client_email'],
+         'private_key_id':kw['private_key_id'],
+         'private_key': kw['private_key'],
+     }
+    credentials=ServiceAccountCredentials.from_json_keyfile_dict(
+        credentials_dict
+    )
+    client = storage.Client(credentials=credentials)
+    bucket=storage.get_bucket(kw['access_bucket'])
+    gcp_path = kw["path"]
+    blob = bucket.blob(gcp_path)
+    temp_model_fname = os.path.join(tempfile.mkdtemp(), 'local_model')
+    try:
+        blob.download_to_filename(temp_model_fname)
+        logger.info("success to load model from gcp %s", gcp_path)
+    except Exception as e:
+        logging.error("fail to load model: " + e)
+        raise Exception("fail to load model from gcp %s", gcp_path)
+    
 
 def parse_parameters(input, splitter_between, splitter_in):
     """

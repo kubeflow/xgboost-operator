@@ -25,31 +25,57 @@ The following files are available to setup distributed XGBoost computation runti
  
 To store the model in OSS:
 
-* xgboostjob_v1alpha1_iris_train.yaml 
-* xgboostjob_v1alpha1_iris_predict.yaml
+* xgboostjob_v1alpha1_iris_train_oss.yaml 
+* xgboostjob_v1alpha1_iris_predict_oss.yaml
+
+To store the model in GCP:
+* xgboostjob_v1alpha1_iris_train_gcp.yaml
+* xgboostjob_v1alpha1_iris_predict_gcp.yaml
 
 To store the model in local path:
 
 * xgboostjob_v1alpha1_iris_train_local.yaml
 * xgboostjob_v1alpha1_iris_predict_local.yaml
 
-For training jobs in OSS , you could configure xgboostjob_v1alpha1_iris_train.yaml and xgboostjob_v1alpha1_iris_predict.yaml
+**Configure OSS parameter**
+For training jobs in OSS , you could configure xgboostjob_v1alpha1_iris_train_oss.yaml and xgboostjob_v1alpha1_iris_predict_oss.yaml
 Note, we use [OSS](https://www.alibabacloud.com/product/oss) to store the trained model,
-thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in xgboostjob_v1alpha1_iris_train.yaml and xgboostjob_v1alpha1_iris_predict.yaml file.
+thus, you need to specify the OSS parameter in the yaml file. Therefore, remember to fill the OSS parameter in xgboostjob_v1alpha1_iris_train_oss.yaml and xgboostjob_v1alpha1_iris_predict_oss.yaml file.
 The oss parameter includes the account information such as access_id, access_key, access_bucket and endpoint.
 For Eg:
 --oss_param=endpoint:http://oss-ap-south-1.aliyuncs.com,access_id:XXXXXXXXXXX,access_key:XXXXXXXXXXXXXXXXXXX,access_bucket:XXXXXX
-Similarly, xgboostjob_v1alpha1_iris_predict.yaml is used to configure XGBoost job batch prediction.
+Similarly, xgboostjob_v1alpha1_iris_predict_oss.yaml is used to configure XGBoost job batch prediction.
+
+**Configure GCP parameter**
+For training jobs in GCP , you could configure xgboostjob_v1alpha1_iris_train_gcp.yaml and xgboostjob_v1alpha1_iris_predict_gcp.yaml
+Note, we use [GCP](https://cloud.google.com/) to store the trained model,
+thus, you need to specify the GCP parameter in the yaml file. Therefore, remember to fill the GCP parameter in xgboostjob_v1alpha1_iris_train_gcp.yaml and xgboostjob_v1alpha1_iris_predict_gcp.yaml file.
+The gcp parameter includes the account information such as type, client_id, client_email,private_key_id,private_key and access_bucket.
+For Eg:
+--gcp_param=type:XXXXXXX,client_id:XXXXXXXX,client_email:XXXXXXXXXX@gmail.com,private_key_id: XXXXXXXXXXXXX,private_key:XXXXXXXXXXXXXXX, access_bucket:XXXXXX
+Similarly, xgboostjob_v1alpha1_iris_predict_gcp.yaml is used to configure XGBoost job batch prediction.
 
 
-**Start the distributed XGBoost train to store the model in OSS**
+**Start the distributed XGBoost train to store the model in cloud**
+
+If you use OSS
 ```
-kubectl create -f xgboostjob_v1alpha1_iris_train.yaml
+kubectl create -f xgboostjob_v1alpha1_iris_train_oss.yaml
+```
+If you use GCP
+```
+kubectl create -f xgboostjob_v1alpha1_iris_train_gcp.yaml
 ```
 
 **Look at the train job status**
+
+If you use OSS
 ```
- kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-oss
+ ```
+If you use GCP
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-train-gcp
  ```
  Here is a sample output when the job is finished. The output log like this
 ```
@@ -154,14 +180,25 @@ Events:
   Normal  XGBoostJobSucceeded      47s                xgboostjob-operator  XGBoostJob xgboost-dist-iris-test is successfully completed.
  ```
 
-**Start the distributed XGBoost job predict**
-```shell
-kubectl create -f xgboostjob_v1alpha1_iris_predict.yaml
+**Start the distributed XGBoost job predict in cloud**
+
+If you use OSS
+```
+kubectl create -f xgboostjob_v1alpha1_iris_predict_oss.yaml
+```
+If you use GCP
+```
+kubectl create -f xgboostjob_v1alpha1_iris_predict_gcp.yaml
 ```
 
 **Look at the batch predict job status**
+If you use OSS
 ```
- kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict-oss
+ ```
+If you use GCP
+```
+ kubectl get -o yaml XGBoostJob/xgboost-dist-iris-test-predict-gcp
  ```
  Here is a sample output when the job is finished. The output log like this
 ```
